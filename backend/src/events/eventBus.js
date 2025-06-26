@@ -203,4 +203,7 @@ class EventBus extends EventEmitter {
   }
 }
 
-module.exports = new EventBus();
+module.exports = {
+  EventBus,
+  eventBus: new EventBus()
+};

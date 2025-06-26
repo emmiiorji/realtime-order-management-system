@@ -1,5 +1,5 @@
 const { AppError, catchAsync } = require('../middleware/errorHandler');
-const eventBus = require('../events/eventBus');
+const { eventBus } = require('../events/eventBus');
 const EventStore = require('../events/eventStore');
 const { validateEventData, createEventMetadata, ALL_EVENTS } = require('../events/eventTypes');
 const logger = require('../config/logger');

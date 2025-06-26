@@ -10,7 +10,7 @@ const { Server } = require('socket.io');
 const logger = require('./config/logger');
 const database = require('./config/database');
 const redisConnection = require('./config/redis');
-const eventBus = require('./events/eventBus');
+const { eventBus } = require('./events/eventBus');
 const eventHandlerManager = require('./events/handlers');
 const swagger = require('./config/swagger');
 

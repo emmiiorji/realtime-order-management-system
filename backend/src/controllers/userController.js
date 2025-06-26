@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const { AppError, catchAsync } = require('../middleware/errorHandler');
-const eventBus = require('../events/eventBus');
+const { eventBus } = require('../events/eventBus');
 const { USER_EVENTS } = require('../events/eventTypes');
 const logger = require('../config/logger');
 
@@ -13,9 +13,33 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
+// Helper to filter user response fields
+function filterUserResponse(user) {
+  if (!user) return user;
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    isActive: user.isActive,
+    isEmailVerified: user.isEmailVerified,
+    lastLogin: user.lastLogin,
+    profile: user.profile,
+    metadata: user.metadata,
+    // Add/remove fields as needed to match test expectations
+  };
+}
+
 // Register a new user
 exports.register = catchAsync(async (req, res, next) => {
   const { username, email, password, firstName, lastName } = req.body;
+
+  // Check for missing required fields
+  if (!username || !email || !password) {
+    return next(new AppError('Username, email, and password are required', 400));
+  }
 
   // Check if user already exists
   const existingUser = await User.findOne({
@@ -57,7 +81,7 @@ exports.register = catchAsync(async (req, res, next) => {
     status: 'success',
     message: 'User registered successfully',
     data: {
-      user: newUser
+      user: filterUserResponse(newUser)
     }
   });
 });
@@ -93,15 +117,7 @@ exports.login = catchAsync(async (req, res, next) => {
       status: 'success',
       message: 'Login successful',
       data: {
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          lastLogin: user.lastLogin
-        }
+        user: filterUserResponse(user)
       }
     });
   } catch (error) {
@@ -116,8 +132,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
 // Get current user profile
 exports.getProfile = catchAsync(async (req, res, next) => {
-  // This would normally get the user from req.user (set by auth middleware)
-  // For now, we'll use a placeholder
   const userId = req.headers['x-user-id']; // Temporary solution
   
   if (!userId) {
@@ -133,7 +147,7 @@ exports.getProfile = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
-      user
+      user: filterUserResponse(user)
     }
   });
 });
@@ -183,7 +197,7 @@ exports.updateProfile = catchAsync(async (req, res, next) => {
     status: 'success',
     message: 'Profile updated successfully',
     data: {
-      user: updatedUser
+      user: filterUserResponse(updatedUser)
     }
   });
 });
@@ -284,7 +298,7 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
       pages: Math.ceil(total / limit)
     },
     data: {
-      users
+      users: users.map(filterUserResponse)
     }
   });
 });
@@ -300,7 +314,7 @@ exports.getUser = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
-      user
+      user: filterUserResponse(user)
     }
   });
 });
@@ -334,7 +348,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
-      user: updatedUser
+      user: filterUserResponse(updatedUser)
     }
   });
 });
