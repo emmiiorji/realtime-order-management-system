@@ -59,7 +59,7 @@ const sendErrorProd = (err, req, res) => {
     // A) Operational, trusted error: send message to client
     if (err.isOperational) {
       return res.status(err.statusCode).json({
-        status: err.status,
+        status: 'error',
         message: err.message
       });
     }

@@ -68,6 +68,7 @@ const userUpdateSchema = Joi.object({
   role: Joi.string()
     .valid('user', 'admin', 'moderator')
     .optional(),
+  password: Joi.string().optional(),
   profile: Joi.object({
     bio: Joi.string().max(500).optional(),
     dateOfBirth: Joi.date().optional(),

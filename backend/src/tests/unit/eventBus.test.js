@@ -1,15 +1,18 @@
-const EventBus = require('../../events/eventBus');
-const EventStore = require('../../events/eventStore');
+const { EventBus } = require('../../events/eventBus');
 const { USER_EVENTS } = require('../../events/eventTypes');
 
 // Mock dependencies
 jest.mock('../../config/logger');
+jest.mock('../../events/eventStore');
 jest.mock('../../config/redis', () => ({
   getSubscriber: jest.fn(() => ({
     subscribe: jest.fn(),
   })),
   getPublisher: jest.fn(() => ({
     publish: jest.fn(),
+  })),
+  getClient: jest.fn(() => ({
+    isReady: true,
   })),
 }));
 
@@ -19,7 +22,7 @@ describe('EventBus', () => {
 
   beforeEach(() => {
     // Reset the EventBus instance
-    eventBus = new (require('../../events/eventBus').constructor)();
+    eventBus = new EventBus();
     
     // Mock EventStore
     mockEventStore = {
@@ -113,7 +116,7 @@ describe('EventBus', () => {
     });
 
     it('should not publish when not initialized', async () => {
-      const uninitializedEventBus = new (require('../../events/eventBus').constructor)();
+      const uninitializedEventBus = new EventBus();
       
       await expect(
         uninitializedEventBus.publish(USER_EVENTS.USER_CREATED, {})

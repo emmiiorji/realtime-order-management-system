@@ -159,7 +159,7 @@ describe('UserRepository', () => {
 
     it('should throw error if user already exists', async () => {
       User.findOne.mockResolvedValue(mockUser); // Existing user
-
+      userRepository.create = jest.fn();
       await expect(
         userRepository.createUser(userData)
       ).rejects.toThrow(AppError);

@@ -1,22 +1,85 @@
-// Test setup file
-const mongoose = require('mongoose');
-
 // Mock environment variables
 process.env.NODE_ENV = 'test';
-process.env.MONGODB_URI = 'mongodb://localhost:27017/test_db';
+process.env.MONGODB_URI = 'mongodb://localhost:27017/realtime-order-management-system-test';
 process.env.REDIS_HOST = 'localhost';
 process.env.REDIS_PORT = '6379';
-process.env.JWT_SECRET = 'test_jwt_secret';
+process.env.JWT_SECRET = 'test_jwt_secret_1234567890_abcdef';
+process.env.ENCRYPTION_KEY = 'test_encryption_key_1234567890_abcdef';
+process.env.SESSION_SECRET = 'test_session_secret_1234567890_abcdef';
+
+const mongoose = require('mongoose');
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+
+// Mock Redis connection
+jest.mock('../config/redis', () => ({
+  connect: jest.fn().mockResolvedValue(),
+  disconnect: jest.fn().mockResolvedValue(),
+  getClient: jest.fn().mockReturnValue({
+    isReady: true,
+    on: jest.fn(),
+    off: jest.fn(),
+  }),
+  getPublisher: jest.fn().mockReturnValue({
+    publish: jest.fn().mockResolvedValue(),
+  }),
+  getSubscriber: jest.fn().mockReturnValue({
+    subscribe: jest.fn().mockResolvedValue(),
+    unsubscribe: jest.fn().mockResolvedValue(),
+  }),
+}));
+
+// Mock event bus - but don't mock it globally since we want to test the actual EventBus class
+// Individual tests can mock specific dependencies as needed
+
+// Mock logger
+jest.mock('../config/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 
 // Global test setup
 beforeAll(async () => {
   // Setup test database connection if needed
-  // await mongoose.connect(process.env.MONGODB_URI);
+  await mongoose.connect(process.env.MONGODB_URI);
 });
 
 afterAll(async () => {
   // Cleanup test database if needed
-  // await mongoose.connection.close();
+  await mongoose.connection.close();
+});
+
+beforeEach(async () => {
+  await User.deleteMany({});
+  
+  // Hash the password properly for the seeded user
+  const hashedPassword = await bcrypt.hash('Password123', 10);
+  
+  await User.create({
+    id: 'user123',
+    username: 'testuser',
+    email: 'test@example.com',
+    password: hashedPassword,
+    firstName: 'Test',
+    lastName: 'User',
+    role: 'user',
+    isActive: true,
+    isEmailVerified: false,
+    profile: {
+      preferences: {
+        notifications: { email: true, sms: false, push: true },
+        theme: 'auto',
+        language: 'en',
+      },
+    },
+    metadata: {
+      createdBy: 'system',
+      updatedBy: 'system',
+      tags: [],
+    },
+  });
 });
 
 // Mock console methods to reduce noise in tests
