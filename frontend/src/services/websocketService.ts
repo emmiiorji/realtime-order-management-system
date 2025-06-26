@@ -1,9 +1,9 @@
 import { io, Socket } from 'socket.io-client';
-import { Event } from './api';
+import type { Event } from './api';
 
 export type EventCallback = (event: Event) => void;
 export type ConnectionCallback = () => void;
-export type ErrorCallback = (error: any) => void;
+export type ErrorCallback = (error: unknown) => void;
 
 class WebSocketService {
   private socket: Socket | null = null;
@@ -197,7 +197,7 @@ class WebSocketService {
     }
   }
 
-  public emit(eventName: string, data: any): void {
+  public emit(eventName: string, data: unknown): void {
     if (this.socket && this.isConnected) {
       this.socket.emit(eventName, data);
     }

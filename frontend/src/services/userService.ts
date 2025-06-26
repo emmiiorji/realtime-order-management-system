@@ -1,4 +1,5 @@
-import { api, ApiResponse, User, CreateUserRequest, LoginRequest, UpdateUserRequest } from './api';
+import { api } from './api';
+import type { ApiResponse, User, CreateUserRequest, LoginRequest, UpdateUserRequest } from './api';
 
 export class UserService {
   // Authentication

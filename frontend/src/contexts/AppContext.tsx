@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { User, Event } from '../services/api';
+import { createContext, useContext, useReducer, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import type { User, Event } from '../services/api';
 import UserService from '../services/userService';
 import websocketService from '../services/websocketService';
 
@@ -156,16 +157,17 @@ export function AppProvider({ children }: AppProviderProps) {
         title: 'Login Successful',
         message: `Welcome back, ${response.data.user.firstName || response.data.user.username}!`,
       });
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Login failed';
+    } catch (error: unknown) {
+      let errorMessage = 'Login failed';
+      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+        errorMessage = (error.response as { data?: { message?: string } }).data?.message || errorMessage;
+      }
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      
       addNotification({
         type: 'error',
         title: 'Login Failed',
         message: errorMessage,
       });
-      
       throw error;
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -175,7 +177,7 @@ export function AppProvider({ children }: AppProviderProps) {
   const logout = async (): Promise<void> => {
     try {
       await UserService.logout();
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('Logout error:', error);
     } finally {
       dispatch({ type: 'SET_USER', payload: null });
@@ -200,10 +202,9 @@ export function AppProvider({ children }: AppProviderProps) {
       const response = await UserService.getProfile();
       dispatch({ type: 'SET_USER', payload: response.data.user });
       dispatch({ type: 'SET_AUTHENTICATED', payload: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to load user:', error);
-      // If token is invalid, clear authentication
-      if (error.response?.status === 401) {
+      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'status' in error.response && (error.response as { status?: number }).status === 401) {
         await logout();
       }
     } finally {

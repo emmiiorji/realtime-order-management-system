@@ -1,19 +1,20 @@
-import { api, ApiResponse, Event } from './api';
+import { api } from './api';
+import type { ApiResponse, Event } from './api';
 
 export class EventService {
   // Event monitoring
-  static async getEventSystemHealth(): Promise<ApiResponse<{ health: any }>> {
-    const response = await api.get<ApiResponse<{ health: any }>>('/events/health');
+  static async getEventSystemHealth(): Promise<ApiResponse<{ health: Record<string, unknown> }>> {
+    const response = await api.get<ApiResponse<{ health: Record<string, unknown> }>>('/events/health');
     return response.data;
   }
 
-  static async getEventStats(): Promise<ApiResponse<{ stats: any }>> {
-    const response = await api.get<ApiResponse<{ stats: any }>>('/events/stats');
+  static async getEventStats(): Promise<ApiResponse<{ stats: Record<string, unknown> }>> {
+    const response = await api.get<ApiResponse<{ stats: Record<string, unknown> }>>('/events/stats');
     return response.data;
   }
 
-  static async getSubscribers(): Promise<ApiResponse<{ subscribers: any[] }>> {
-    const response = await api.get<ApiResponse<{ subscribers: any[] }>>('/events/subscribers');
+  static async getSubscribers(): Promise<ApiResponse<{ subscribers: unknown[] }>> {
+    const response = await api.get<ApiResponse<{ subscribers: unknown[] }>>('/events/subscribers');
     return response.data;
   }
 
@@ -45,8 +46,8 @@ export class EventService {
     eventType?: string;
     page?: number;
     limit?: number;
-  }): Promise<ApiResponse<{ events: Event[]; dateRange: any }>> {
-    const response = await api.get<ApiResponse<{ events: Event[]; dateRange: any }>>('/events/date-range', { params });
+  }): Promise<ApiResponse<{ events: Event[]; dateRange: Record<string, unknown> }>> {
+    const response = await api.get<ApiResponse<{ events: Event[]; dateRange: Record<string, unknown> }>>('/events/date-range', { params });
     return response.data;
   }
 
@@ -58,8 +59,8 @@ export class EventService {
   // Event publishing (for testing)
   static async publishEvent(eventData: {
     eventType: string;
-    data: any;
-    metadata?: any;
+    data: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
   }): Promise<ApiResponse<{ event: Event }>> {
     const response = await api.post<ApiResponse<{ event: Event }>>('/events/publish', eventData);
     return response.data;
@@ -93,11 +94,10 @@ export class EventService {
   }
 
   static getEventPriority(event: Event): 'low' | 'normal' | 'high' | 'critical' {
-    const priority = event.metadata?.priority;
-    if (priority && ['low', 'normal', 'high', 'critical'].includes(priority)) {
-      return priority as 'low' | 'normal' | 'high' | 'critical';
+    const priority = event.priority;
+    if (priority && ['low', 'normal', 'high', 'critical'].includes(String(priority))) {
+      return String(priority) as 'low' | 'normal' | 'high' | 'critical';
     }
-    
     // Determine priority based on event type
     if (event.type.includes('error') || event.type.includes('failed')) {
       return 'high';

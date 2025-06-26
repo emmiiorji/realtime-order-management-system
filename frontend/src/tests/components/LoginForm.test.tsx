@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppProvider } from '../../contexts/AppContext';
 import LoginForm from '../../components/auth/LoginForm';
@@ -151,7 +150,12 @@ describe('LoginForm', () => {
         email: 'test@example.com',
         firstName: 'Test',
         lastName: 'User',
-      };
+        role: 'user',
+        isActive: true,
+        isEmailVerified: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as const;
 
       MockedUserService.login.mockResolvedValue({
         status: 'success',
@@ -365,9 +369,20 @@ describe('LoginForm', () => {
       });
 
       // Then, mock successful login
+      const minimalUser = {
+        id: 'user456',
+        username: 'minimaluser',
+        email: 'minimal@example.com',
+        role: 'user',
+        isActive: true,
+        isEmailVerified: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as const;
+
       MockedUserService.login.mockResolvedValue({
         status: 'success',
-        data: { user: { id: 'user123', email: 'test@example.com' } },
+        data: { user: minimalUser },
       });
 
       await user.clear(passwordInput);

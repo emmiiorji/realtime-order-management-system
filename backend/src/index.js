@@ -20,7 +20,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 
 // Import middleware
-const errorHandler = require('./middleware/errorHandler');
+const { globalErrorHandler } = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 
 class Application {
@@ -102,7 +102,11 @@ class Application {
     });
 
     // API Documentation
-    this.app.use('/api-docs', swagger.serve, swagger.setup);
+    this.app.use('/api-docs', swagger.serve, swagger.setup(swagger.specs, {
+      explorer: true,
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'Real-time Order Management System API Documentation',
+    }));
 
     // API routes
     this.app.use('/api/users', userRoutes);
@@ -115,7 +119,7 @@ class Application {
     this.app.use(notFound);
     
     // Global error handler
-    this.app.use(errorHandler);
+    this.app.use(globalErrorHandler);
   }
 
   setupSocketIO() {

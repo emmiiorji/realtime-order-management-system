@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import OrderService from '../../services/orderService';
 import EventService from '../../services/eventService';
-import { Order, Event } from '../../services/api';
+import type { Order, Event } from '../../services/api';
 
 export function Dashboard() {
   const { state } = useApp();

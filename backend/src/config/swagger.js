@@ -636,9 +636,5 @@ module.exports = {
   specs,
   swaggerUi,
   serve: swaggerUi.serve,
-  setup: swaggerUi.setup(specs, {
-    explorer: true,
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'Real-time Order Management System API Documentation',
-  }),
+  setup: swaggerUi.setup,
 };

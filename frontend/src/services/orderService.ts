@@ -1,4 +1,5 @@
-import { api, ApiResponse, Order, CreateOrderRequest } from './api';
+import { api } from './api';
+import type { ApiResponse, Order, CreateOrderRequest } from './api';
 
 export class OrderService {
   // Order management
