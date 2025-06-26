@@ -1,0 +1,389 @@
+# Real-time Order Management System - .gitignore
+
+# ================================
+# SECURITY & ENVIRONMENT FILES
+# ================================
+# Environment variables (NEVER commit secrets!)
+**/.env
+.env.local
+.env.production
+.env.staging
+.env.development
+.env.test
+
+# Secret files
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+
+# ================================
+# NODE.JS & NPM
+# ================================
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+storybook-static
+
+# Temporary folders
+tmp/
+temp/
+
+# ================================
+# FRONTEND (REACT/VITE)
+# ================================
+# Build outputs
+frontend/dist/
+frontend/build/
+
+# Vite
+frontend/.vite/
+
+# Local env files
+frontend/.env.local
+frontend/.env.*.local
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ================================
+# BACKEND (NODE.JS/EXPRESS)
+# ================================
+# Build outputs
+backend/dist/
+backend/build/
+
+# Logs
+backend/logs/
+*.log
+
+# Runtime data
+backend/pids/
+backend/*.pid
+backend/*.seed
+backend/*.pid.lock
+
+# ================================
+# DATABASE & CACHE
+# ================================
+# MongoDB
+*.mongodb
+*.db
+
+# Redis dump files
+dump.rdb
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# Database backups
+*.sql
+*.dump
+
+# ================================
+# DOCKER & CONTAINERS
+# ================================
+# Docker volumes
+docker-volumes/
+volumes/
+
+# Docker override files
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Docker build context
+.dockerignore
+
+# ================================
+# TESTING
+# ================================
+# Test results
+test-results/
+coverage/
+.coverage
+htmlcov/
+
+# Jest
+jest-coverage/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ================================
+# DEVELOPMENT TOOLS
+# ================================
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+*.lnk
+
+# Linux
+*~
+
+# ================================
+# BUILD & DEPLOYMENT
+# ================================
+# Build artifacts
+build/
+dist/
+out/
+
+# Deployment files
+deploy/
+deployment/
+
+# CI/CD
+.github/workflows/secrets/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes
+*.kubeconfig
+
+# ================================
+# MONITORING & LOGS
+# ================================
+# Application logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# PM2 logs
+.pm2/
+
+# Error logs
+error.log
+access.log
+
+# ================================
+# BACKUP & TEMPORARY FILES
+# ================================
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Temporary files
+*.tmp
+*.temp
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# ================================
+# PACKAGE MANAGERS
+# ================================
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# pnpm
+.pnpm-store/
+
+# ================================
+# DOCUMENTATION
+# ================================
+# Generated documentation
+docs/build/
+docs/dist/
+
+# API documentation cache
+.swagger-codegen/
+
+# ================================
+# MISCELLANEOUS
+# ================================
+# Local configuration
+local.json
+local.js
+
+# User-specific files
+.user
+*.user
+
+# JetBrains IDEs
+.idea/
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ================================
+# PROJECT SPECIFIC
+# ================================
+# Order management system specific
+uploads/
+attachments/
+exports/
+
+# Email templates cache
+email-templates-cache/
+
+# Report generation
+reports/
+generated-reports/
+
+# ================================
+# SECURITY SCANNING
+# ================================
+# Security scan results
+security-scan-results/
+vulnerability-reports/
+
+# ================================
+# PERFORMANCE & PROFILING
+# ================================
+# Performance profiles
+*.prof
+*.heapsnapshot
+
+# Load testing results
+load-test-results/
+
+# ================================
+# END OF .gitignore
+# ================================
