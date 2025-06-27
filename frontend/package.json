@@ -9,10 +9,18 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
+    "test:unit": "vitest --run src/tests/services src/tests/utils",
+    "test:components": "vitest --run src/tests/components",
+    "test:integration": "vitest --run src/tests/integration",
+    "test:e2e": "vitest --run src/tests/e2e",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "clean": "rm -rf node_modules coverage dist"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.4.0",
     "@tanstack/react-query": "^5.8.4",
     "axios": "^1.6.2",
     "lucide-react": "^0.294.0",

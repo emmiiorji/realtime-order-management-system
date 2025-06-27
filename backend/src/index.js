@@ -18,6 +18,7 @@ const swagger = require('./config/swagger');
 const userRoutes = require('./routes/userRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 // Import middleware
 const { globalErrorHandler } = require('./middleware/errorHandler');
@@ -112,6 +113,7 @@ class Application {
     this.app.use('/api/users', userRoutes);
     this.app.use('/api/orders', orderRoutes);
     this.app.use('/api/events', eventRoutes);
+    this.app.use('/api/payments', paymentRoutes);
   }
 
   setupErrorHandling() {

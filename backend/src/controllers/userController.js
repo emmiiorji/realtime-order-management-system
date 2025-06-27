@@ -1,5 +1,6 @@
 const User = require('../models/User');
-const { AppError, catchAsync } = require('../middleware/errorHandler');
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 const { eventBus } = require('../events/eventBus');
 const { USER_EVENTS } = require('../events/eventTypes');
 const logger = require('../config/logger');

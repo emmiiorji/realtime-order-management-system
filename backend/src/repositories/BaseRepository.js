@@ -1,4 +1,4 @@
-const { AppError } = require('../middleware/errorHandler');
+const AppError = require('../utils/appError');
 const logger = require('../config/logger');
 
 class BaseRepository {

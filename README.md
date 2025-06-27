@@ -20,23 +20,28 @@ This project showcases a complete real-time order management system featuring:
 
 ### Backend Features
 - **User Management**: Registration, authentication, profile management
-- **Order Processing**: Complete order lifecycle management
-- **Event System**: Publish/subscribe event architecture with retry mechanisms
-- **Real-time Updates**: WebSocket support for live notifications
-- **Data Validation**: Comprehensive input validation and sanitization
-- **Error Handling**: Centralized error handling with proper HTTP status codes
-- **Logging**: Structured logging with different levels
-- **Rate Limiting**: API rate limiting for security
-- **Health Checks**: System health monitoring endpoints
+- **Order Processing**: Complete order lifecycle management with inventory integration
+- **Payment Processing**: Full Stripe integration with payment intents, confirmations, and refunds
+- **Event System**: Publish/subscribe event architecture with retry mechanisms and correlation tracking
+- **Real-time Updates**: WebSocket support for live notifications and order status updates
+- **Data Validation**: Comprehensive input validation and sanitization with Joi schemas
+- **Error Handling**: Centralized error handling with proper HTTP status codes and user-friendly messages
+- **Webhook Processing**: Secure Stripe webhook handling for payment events
+- **Logging**: Structured logging with different levels and correlation IDs
+- **Rate Limiting**: API rate limiting for security and abuse prevention
+- **Health Checks**: System health monitoring endpoints with detailed status information
 
 ### Frontend Features
-- **Modern React**: Built with React 18 and TypeScript
-- **Real-time UI**: Live updates via WebSocket connections
-- **Responsive Design**: Mobile-first responsive design with Tailwind CSS
-- **State Management**: Context API for global state management
-- **Form Validation**: Client-side validation with user-friendly error messages
-- **Notifications**: Toast notifications for user feedback
-- **Dashboard**: Comprehensive user dashboard with statistics
+- **Modern React**: Built with React 18 and TypeScript with latest best practices
+- **Payment Integration**: Complete Stripe Elements integration with payment forms and status displays
+- **Order Management**: Comprehensive order creation, tracking, and management interface
+- **Real-time UI**: Live updates via WebSocket connections for order and payment status
+- **Responsive Design**: Mobile-first responsive design with custom CSS and dark mode support
+- **State Management**: Context API for global state management with optimistic updates
+- **Form Validation**: Client-side validation with user-friendly error messages and real-time feedback
+- **Payment Security**: Secure payment processing with PCI-compliant Stripe integration
+- **Notifications**: Toast notifications for user feedback and real-time event updates
+- **Dashboard**: Comprehensive user dashboard with order statistics and payment history
 
 ### Event System Features
 - **Event Store**: Persistent event storage with MongoDB
@@ -53,20 +58,22 @@ This project showcases a complete real-time order management system featuring:
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose ODM
 - **Cache**: Redis
-- **Authentication**: JWT tokens
-- **Validation**: Joi
-- **Testing**: Jest
-- **Documentation**: Swagger/OpenAPI
-- **Logging**: Winston
+- **Authentication**: JWT tokens with secure session management
+- **Payment Processing**: Stripe SDK for secure payment handling
+- **Validation**: Joi with comprehensive schema validation
+- **Testing**: Jest with extensive unit, integration, and e2e test coverage
+- **Documentation**: Swagger/OpenAPI with comprehensive API documentation
+- **Logging**: Winston with structured logging and correlation tracking
 
 ### Frontend
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **HTTP Client**: Axios
-- **Real-time**: Socket.IO client
-- **Testing**: Vitest + React Testing Library
-- **State Management**: React Context API
+- **Framework**: React 18 with TypeScript and modern hooks
+- **Build Tool**: Vite with optimized build configuration
+- **Styling**: Custom CSS with responsive design and dark mode support
+- **Payment UI**: Stripe Elements for secure payment forms
+- **HTTP Client**: Axios with interceptors and error handling
+- **Real-time**: Socket.IO client for live updates
+- **Testing**: Vitest + React Testing Library with comprehensive test coverage
+- **State Management**: React Context API with optimistic updates
 
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
@@ -157,45 +164,120 @@ The API is fully documented using OpenAPI/Swagger. Once the backend is running, 
 
 #### Order Management
 - `POST /api/orders` - Create new order
-- `GET /api/orders/my-orders` - Get user's orders
-- `GET /api/orders/:id` - Get specific order
-- `PATCH /api/orders/:id` - Update order
-- `DELETE /api/orders/:id` - Cancel order
+- `GET /api/orders/my-orders` - Get user's orders with pagination and filtering
+- `GET /api/orders/:id` - Get specific order details
+- `PATCH /api/orders/:id` - Update order information
+- `DELETE /api/orders/:id` - Cancel order with reason
+- `GET /api/orders/:id/tracking` - Get order tracking information
+- `GET /api/orders/stats` - Get order statistics and analytics
+
+#### Payment Processing
+- `POST /api/payments/create-intent` - Create Stripe payment intent
+- `POST /api/payments/confirm` - Confirm payment with payment method
+- `GET /api/payments/payment-methods/:customerId` - Get saved payment methods
+- `POST /api/payments/save-payment-method` - Save payment method for future use
+- `POST /api/payments/refund` - Process payment refund
+- `GET /api/payments/history/:customerId` - Get payment history
+- `POST /api/payments/webhook` - Stripe webhook endpoint for payment events
 
 #### Event System
-- `GET /api/events` - Get events (with pagination)
-- `GET /api/events/stats` - Get event statistics
-- `GET /api/events/health` - Event system health check
+- `GET /api/events` - Get events (with pagination and filtering)
+- `GET /api/events/stats` - Get event statistics and metrics
+- `GET /api/events/health` - Event system health check and status
 
 ## 🧪 Testing
 
-### Backend Tests
+This project includes comprehensive testing with **100+ test cases** covering payment processing, order management, and event handling across both frontend and backend.
+
+### Comprehensive Test Suite
+```bash
+# Run all tests (backend + frontend + integration)
+npm test
+
+# Run only backend tests
+npm run test:backend
+
+# Run only frontend tests
+npm run test:frontend
+
+# Run specific test types
+npm run test:unit           # Unit tests only
+npm run test:integration    # Integration tests only
+npm run test:e2e           # End-to-end tests only
+npm run test:coverage      # All tests with coverage reports
+
+# Watch mode for development
+npm run test:watch
+```
+
+### Test Coverage Areas
+- ✅ **Payment Processing**: Stripe integration, payment intents, confirmations, refunds, webhooks
+- ✅ **Order Management**: Order creation, updates, cancellation, tracking, validation
+- ✅ **Event System**: Event publishing, handling, correlation, error recovery
+- ✅ **API Endpoints**: Request/response validation, authentication, error handling
+- ✅ **Frontend Components**: Payment forms, order forms, status displays, user interactions
+- ✅ **Integration Flows**: Complete order-to-payment workflows, error scenarios
+- ✅ **Real-time Features**: WebSocket connections, live updates, event notifications
+
+### Backend Tests (60+ test cases)
 ```bash
 cd backend
 
-# Run all tests
-npm test
+# Unit tests - Controllers, services, utilities
+npm run test:unit
 
-# Run tests with coverage
+# Integration tests - API routes, database operations
+npm run test:integration
+
+# Coverage report
 npm run test:coverage
-
-# Run tests in watch mode
-npm run test:watch
 ```
 
-### Frontend Tests
+### Frontend Tests (40+ test cases)
 ```bash
 cd frontend
 
-# Run all tests
-npm test
+# Unit tests - Services, utilities, hooks
+npm run test:unit
 
-# Run tests with coverage
+# Component tests - React components, user interactions
+npm run test:components
+
+# Integration tests - Service integration, API calls
+npm run test:integration
+
+# End-to-end tests - Complete user workflows
+npm run test:e2e
+
+# Coverage report
 npm run test:coverage
-
-# Run tests in watch mode
-npm run test:watch
 ```
+
+### Test Categories
+
+#### Payment Processing Tests
+- Payment intent creation and validation
+- Payment confirmation with Stripe Elements
+- Payment method management and saving
+- Refund processing and webhook handling
+- Error scenarios and edge cases
+- Payment form interactions and validation
+
+#### Order Management Tests
+- Order creation with validation
+- Order lifecycle management
+- Order-payment integration
+- Inventory updates and event handling
+- Order tracking and status updates
+- Error handling and recovery
+
+#### Event System Tests
+- Event publishing and subscription
+- Event correlation and causation tracking
+- Cross-system event integration
+- Event retry mechanisms and error handling
+- Real-time event distribution
+- Performance and concurrency testing
 
 ## 🔧 Configuration
 
@@ -236,6 +318,11 @@ ENCRYPTION_KEY=dev-encryption-key-32-chars-min
 API_KEY_SECRET=dev-api-key-secret-for-development
 SESSION_SECRET=dev-session-secret-for-development-only-32-chars-minimum
 CORS_ORIGIN=http://localhost:3000
+
+# Stripe Configuration
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+FRONTEND_URL=http://localhost:3000
 ```
 
 #### Frontend (.env)
@@ -244,6 +331,9 @@ VITE_API_BASE_URL=http://localhost:3001/api
 VITE_WS_URL=http://localhost:3001
 VITE_APP_NAME=Real-time Order Management System
 VITE_ENABLE_DEBUG=true
+
+# Stripe Configuration
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
 ```
 
 ## 🔒 Security
@@ -294,8 +384,10 @@ All sensitive data is managed through environment variables:
 
 ### Event Types
 - **User Events**: `user.created`, `user.updated`, `user.deleted`, `user.login`
-- **Order Events**: `order.created`, `order.updated`, `order.cancelled`, `order.completed`
-- **System Events**: `system.startup`, `system.shutdown`, `system.error`
+- **Order Events**: `order.created`, `order.updated`, `order.cancelled`, `order.completed`, `order.shipped`, `order.delivered`
+- **Payment Events**: `order.payment.processed`, `order.payment.failed`, `order.payment.refunded`
+- **Inventory Events**: `inventory.updated`, `inventory.low_stock`, `inventory.out_of_stock`
+- **System Events**: `system.startup`, `system.shutdown`, `system.error`, `system.health_check`
 
 ### Event Flow
 1. **Event Publishing**: Services publish events to the event bus

@@ -1,0 +1,276 @@
+.payment-status {
+  --status-color: #6b7280;
+  
+  background: #ffffff;
+  border: 2px solid var(--status-color);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-width: 400px;
+}
+
+.payment-status__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-status__icon-container {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--status-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-status__icon {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.payment-status__icon--spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.payment-status__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.payment-status__text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--status-color);
+  margin-bottom: 4px;
+}
+
+.payment-status__amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.payment-status__details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.payment-status__detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.payment-status__detail:last-child {
+  margin-bottom: 0;
+}
+
+.payment-status__detail-label {
+  color: #718096;
+  font-weight: 500;
+}
+
+.payment-status__detail-value {
+  color: #2d3748;
+  font-weight: 600;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+}
+
+/* Status-specific styles */
+.payment-status[style*="--status-color: #10b981"] {
+  background: #f0fff4;
+  border-color: #10b981;
+}
+
+.payment-status[style*="--status-color: #ef4444"] {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.payment-status[style*="--status-color: #f59e0b"] {
+  background: #fffbeb;
+  border-color: #f59e0b;
+}
+
+.payment-status[style*="--status-color: #3b82f6"] {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.payment-status[style*="--status-color: #8b5cf6"] {
+  background: #f5f3ff;
+  border-color: #8b5cf6;
+}
+
+/* Compact variant */
+.payment-status--compact {
+  padding: 12px;
+}
+
+.payment-status--compact .payment-status__icon-container {
+  width: 32px;
+  height: 32px;
+}
+
+.payment-status--compact .payment-status__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.payment-status--compact .payment-status__text {
+  font-size: 14px;
+}
+
+.payment-status--compact .payment-status__amount {
+  font-size: 16px;
+}
+
+/* Inline variant */
+.payment-status--inline {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: transparent;
+  border: 1px solid var(--status-color);
+  max-width: none;
+}
+
+.payment-status--inline .payment-status__main {
+  gap: 8px;
+}
+
+.payment-status--inline .payment-status__icon-container {
+  width: 20px;
+  height: 20px;
+}
+
+.payment-status--inline .payment-status__icon {
+  width: 12px;
+  height: 12px;
+}
+
+.payment-status--inline .payment-status__content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-status--inline .payment-status__text {
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+.payment-status--inline .payment-status__amount {
+  font-size: 14px;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .payment-status {
+    max-width: none;
+  }
+
+  .payment-status__detail {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .payment-status__detail-value {
+    font-size: 11px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .payment-status {
+    background: #2d3748;
+  }
+
+  .payment-status__amount {
+    color: #f7fafc;
+  }
+
+  .payment-status__detail-label {
+    color: #a0aec0;
+  }
+
+  .payment-status__detail-value {
+    color: #e2e8f0;
+  }
+
+  .payment-status__details {
+    border-top-color: #4a5568;
+  }
+
+  /* Dark mode status backgrounds */
+  .payment-status[style*="--status-color: #10b981"] {
+    background: #1a2e1a;
+  }
+
+  .payment-status[style*="--status-color: #ef4444"] {
+    background: #2d1b1b;
+  }
+
+  .payment-status[style*="--status-color: #f59e0b"] {
+    background: #2d2419;
+  }
+
+  .payment-status[style*="--status-color: #3b82f6"] {
+    background: #1a2332;
+  }
+
+  .payment-status[style*="--status-color: #8b5cf6"] {
+    background: #251f3d;
+  }
+}
+
+/* Animation for status changes */
+.payment-status {
+  transition: all 0.3s ease;
+}
+
+.payment-status__icon-container {
+  transition: all 0.3s ease;
+}
+
+.payment-status__text {
+  transition: color 0.3s ease;
+}
+
+/* Accessibility */
+.payment-status:focus {
+  outline: 2px solid var(--status-color);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .payment-status {
+    border: 1px solid #000;
+    background: #fff !important;
+  }
+
+  .payment-status__icon-container {
+    background: #000 !important;
+  }
+
+  .payment-status__text,
+  .payment-status__amount {
+    color: #000 !important;
+  }
+}

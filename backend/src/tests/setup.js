@@ -6,6 +6,9 @@ process.env.REDIS_PORT = '6379';
 process.env.JWT_SECRET = 'test_jwt_secret_1234567890_abcdef';
 process.env.ENCRYPTION_KEY = 'test_encryption_key_1234567890_abcdef';
 process.env.SESSION_SECRET = 'test_session_secret_1234567890_abcdef';
+process.env.STRIPE_SECRET_KEY = 'sk_test_fake_key_for_testing';
+process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_fake_webhook_secret';
+process.env.FRONTEND_URL = 'http://localhost:3000';
 
 const mongoose = require('mongoose');
 const User = require('../models/User');
@@ -90,4 +93,64 @@ global.console = {
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
+};
+
+// Global test utilities
+global.testUtils = {
+  createMockOrder: () => ({
+    id: 'order-123',
+    orderNumber: 'ORD-001',
+    userId: 'test-user-123',
+    items: [
+      {
+        productId: 'prod-123',
+        name: 'Test Product',
+        quantity: 2,
+        unitPrice: 10.00,
+        totalPrice: 20.00,
+        sku: 'TEST-SKU-001'
+      }
+    ],
+    subtotal: 20.00,
+    tax: 1.60,
+    totalAmount: 21.60,
+    status: 'pending',
+    shippingAddress: {
+      firstName: 'John',
+      lastName: 'Doe',
+      street: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zipCode: '12345',
+      country: 'US'
+    },
+    payment: {
+      method: 'stripe',
+      amount: 21.60,
+      currency: 'USD',
+      status: 'pending'
+    },
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }),
+
+  createMockPaymentIntent: () => ({
+    id: 'pi_test123',
+    amount: 2000,
+    currency: 'usd',
+    status: 'requires_payment_method',
+    client_secret: 'pi_test123_secret',
+    metadata: {
+      userId: 'test-user-123',
+      orderId: 'order-123'
+    }
+  }),
+
+  expectEventToBePublished: (mockEventBus, eventType, expectedData) => {
+    expect(mockEventBus.publish).toHaveBeenCalledWith(
+      eventType,
+      expect.objectContaining(expectedData),
+      expect.any(Object)
+    );
+  }
 };

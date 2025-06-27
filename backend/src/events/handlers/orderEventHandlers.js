@@ -254,7 +254,17 @@ class OrderEventHandlers {
 
   // Helper methods
   async sendOrderConfirmation(event) {
-    const { userId, orderNumber, items, totalAmount } = event.data;
+    const { userId, orderNumber, items = [], totalAmount } = event.data || {};
+
+    // Skip if essential data is missing
+    if (!userId || !orderNumber) {
+      logger.warn('Skipping order confirmation - missing required data', {
+        eventId: event.id,
+        hasUserId: !!userId,
+        hasOrderNumber: !!orderNumber
+      });
+      return;
+    }
 
     await eventBus.publish(NOTIFICATION_EVENTS.EMAIL_SENT, {
       userId,
@@ -264,11 +274,11 @@ class OrderEventHandlers {
         orderNumber,
         items,
         totalAmount,
-        orderDate: event.metadata.timestamp
+        orderDate: event.metadata?.timestamp
       },
       priority: 'high'
     }, {
-      correlationId: event.metadata.correlationId,
+      correlationId: event.metadata?.correlationId,
       causationId: event.id,
       userId
     });
@@ -277,22 +287,33 @@ class OrderEventHandlers {
   }
 
   async updateInventory(event) {
-    const { items } = event.data;
+    const { items = [], orderNumber, userId } = event.data || {};
 
-    for (const item of items) {
-      await eventBus.publish(INVENTORY_EVENTS.INVENTORY_UPDATED, {
-        productId: item.productId,
-        quantity: -item.quantity, // Negative for reduction
-        operation: 'order_created',
-        reason: `Order created: ${event.data.orderNumber}`
-      }, {
-        correlationId: event.metadata.correlationId,
-        causationId: event.id,
-        userId: event.data.userId
+    // Skip if no items to process
+    if (!items || items.length === 0) {
+      logger.warn('Skipping inventory update - no items found', {
+        eventId: event.id,
+        orderNumber
       });
+      return;
     }
 
-    logger.debug(`Inventory update events published for order: ${event.data.orderNumber}`);
+    for (const item of items) {
+      if (item.productId && item.quantity) {
+        await eventBus.publish(INVENTORY_EVENTS.INVENTORY_UPDATED, {
+          productId: item.productId,
+          quantity: -item.quantity, // Negative for reduction
+          operation: 'order_created',
+          reason: `Order created: ${orderNumber}`
+        }, {
+          correlationId: event.metadata?.correlationId,
+          causationId: event.id,
+          userId
+        });
+      }
+    }
+
+    logger.debug(`Inventory update events published for order: ${orderNumber}`);
   }
 
   async processPayment(event) {
@@ -306,7 +327,7 @@ class OrderEventHandlers {
 
     // Simulate payment processing
     // In a real implementation, this would integrate with payment processors
-    const paymentSuccess = Math.random() > 0.1; // 90% success rate for demo
+    const paymentSuccess = Math.random() < 0.8; // 80% success rate for demo
 
     if (paymentSuccess) {
       await eventBus.publish(ORDER_EVENTS.ORDER_PAYMENT_PROCESSED, {
@@ -651,11 +672,26 @@ class OrderEventHandlers {
   }
 
   async restoreInventoryAfterPaymentFailure(event) {
-    const { orderId } = event.data;
+    const { orderId, orderNumber, items } = event.data;
 
     logger.debug(`Restoring inventory after payment failure for order: ${orderId}`);
 
-    // This would restore inventory if payment failed
+    // Restore inventory for each item
+    if (items && items.length > 0) {
+      for (const item of items) {
+        await eventBus.publish(INVENTORY_EVENTS.INVENTORY_UPDATED, {
+          productId: item.productId,
+          quantity: item.quantity, // Positive to restore
+          operation: 'payment_failed',
+          reason: `Payment failed for order: ${orderNumber}`
+        }, {
+          correlationId: event.metadata.correlationId,
+          causationId: event.id,
+          userId: event.data.userId
+        });
+      }
+    }
+
     logger.debug('Inventory restored after payment failure', { orderId });
   }
 }

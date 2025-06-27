@@ -1,5 +1,5 @@
 const { EventBus } = require('../../events/eventBus');
-const { USER_EVENTS } = require('../../events/eventTypes');
+const { USER_EVENTS, ORDER_EVENTS, INVENTORY_EVENTS } = require('../../events/eventTypes');
 
 // Mock dependencies
 jest.mock('../../config/logger');
@@ -364,6 +364,265 @@ describe('EventBus', () => {
           }),
         ])
       );
+    });
+  });
+
+  describe('Event Integration Tests', () => {
+    it('should handle order creation event flow', async () => {
+      await eventBus.initialize();
+
+      const orderCreatedHandler = jest.fn().mockResolvedValue();
+      const inventoryHandler = jest.fn().mockResolvedValue();
+
+      eventBus.subscribe(ORDER_EVENTS.ORDER_CREATED, orderCreatedHandler);
+      eventBus.subscribe(INVENTORY_EVENTS.INVENTORY_UPDATED, inventoryHandler);
+
+      // Publish order created event
+      await eventBus.publish(ORDER_EVENTS.ORDER_CREATED, {
+        orderId: 'order-123',
+        orderNumber: 'ORD-001',
+        userId: 'user-123',
+        items: [
+          { productId: 'prod-123', quantity: 2 }
+        ],
+        totalAmount: 20.00
+      });
+
+      // Simulate inventory update as a result of order creation
+      await eventBus.publish(INVENTORY_EVENTS.INVENTORY_UPDATED, {
+        productId: 'prod-123',
+        quantity: -2,
+        operation: 'order_created',
+        reason: 'Order created: ORD-001'
+      });
+
+      expect(orderCreatedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ORDER_EVENTS.ORDER_CREATED,
+          data: expect.objectContaining({
+            orderId: 'order-123',
+            orderNumber: 'ORD-001'
+          })
+        })
+      );
+
+      expect(inventoryHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: INVENTORY_EVENTS.INVENTORY_UPDATED,
+          data: expect.objectContaining({
+            productId: 'prod-123',
+            quantity: -2,
+            operation: 'order_created'
+          })
+        })
+      );
+    });
+
+    it('should handle payment processing event flow', async () => {
+      await eventBus.initialize();
+
+      const paymentProcessedHandler = jest.fn().mockResolvedValue();
+      const orderUpdatedHandler = jest.fn().mockResolvedValue();
+
+      eventBus.subscribe(ORDER_EVENTS.ORDER_PAYMENT_PROCESSED, paymentProcessedHandler);
+      eventBus.subscribe(ORDER_EVENTS.ORDER_UPDATED, orderUpdatedHandler);
+
+      // Publish payment processed event
+      await eventBus.publish(ORDER_EVENTS.ORDER_PAYMENT_PROCESSED, {
+        orderId: 'order-123',
+        orderNumber: 'ORD-001',
+        paymentAmount: 20.00,
+        transactionId: 'txn-123'
+      });
+
+      // Simulate order status update as a result of payment
+      await eventBus.publish(ORDER_EVENTS.ORDER_UPDATED, {
+        orderId: 'order-123',
+        status: 'confirmed',
+        updatedFields: ['status', 'payment']
+      });
+
+      expect(paymentProcessedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ORDER_EVENTS.ORDER_PAYMENT_PROCESSED,
+          data: expect.objectContaining({
+            orderId: 'order-123',
+            paymentAmount: 20.00,
+            transactionId: 'txn-123'
+          })
+        })
+      );
+
+      expect(orderUpdatedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ORDER_EVENTS.ORDER_UPDATED,
+          data: expect.objectContaining({
+            orderId: 'order-123',
+            status: 'confirmed'
+          })
+        })
+      );
+    });
+
+    it('should handle payment failure event flow', async () => {
+      await eventBus.initialize();
+
+      const paymentFailedHandler = jest.fn().mockResolvedValue();
+      const inventoryRestoreHandler = jest.fn().mockResolvedValue();
+
+      eventBus.subscribe(ORDER_EVENTS.ORDER_PAYMENT_FAILED, paymentFailedHandler);
+      eventBus.subscribe(INVENTORY_EVENTS.INVENTORY_UPDATED, inventoryRestoreHandler);
+
+      // Publish payment failed event
+      await eventBus.publish(ORDER_EVENTS.ORDER_PAYMENT_FAILED, {
+        orderId: 'order-123',
+        orderNumber: 'ORD-001',
+        failureReason: 'Insufficient funds'
+      });
+
+      // Simulate inventory restoration as a result of payment failure
+      await eventBus.publish(INVENTORY_EVENTS.INVENTORY_UPDATED, {
+        productId: 'prod-123',
+        quantity: 2, // Positive to restore
+        operation: 'payment_failed',
+        reason: 'Payment failed for order: ORD-001'
+      });
+
+      expect(paymentFailedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ORDER_EVENTS.ORDER_PAYMENT_FAILED,
+          data: expect.objectContaining({
+            orderId: 'order-123',
+            failureReason: 'Insufficient funds'
+          })
+        })
+      );
+
+      expect(inventoryRestoreHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: INVENTORY_EVENTS.INVENTORY_UPDATED,
+          data: expect.objectContaining({
+            productId: 'prod-123',
+            quantity: 2,
+            operation: 'payment_failed'
+          })
+        })
+      );
+    });
+
+    it('should handle event correlation and causation', async () => {
+      await eventBus.initialize();
+
+      const handler = jest.fn().mockResolvedValue();
+      eventBus.subscribe(ORDER_EVENTS.ORDER_CREATED, handler);
+
+      const correlationId = 'corr-123';
+      const causationId = 'cause-456';
+
+      await eventBus.publish(ORDER_EVENTS.ORDER_CREATED, {
+        orderId: 'order-123'
+      }, {
+        correlationId,
+        causationId,
+        userId: 'user-123'
+      });
+
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            correlationId,
+            causationId,
+            userId: 'user-123'
+          })
+        })
+      );
+    });
+
+    it('should handle multiple subscribers for the same event', async () => {
+      await eventBus.initialize();
+
+      const handler1 = jest.fn().mockResolvedValue();
+      const handler2 = jest.fn().mockResolvedValue();
+      const handler3 = jest.fn().mockResolvedValue();
+
+      eventBus.subscribe(ORDER_EVENTS.ORDER_CREATED, handler1);
+      eventBus.subscribe(ORDER_EVENTS.ORDER_CREATED, handler2);
+      eventBus.subscribe(ORDER_EVENTS.ORDER_CREATED, handler3);
+
+      await eventBus.publish(ORDER_EVENTS.ORDER_CREATED, {
+        orderId: 'order-123'
+      });
+
+      expect(handler1).toHaveBeenCalled();
+      expect(handler2).toHaveBeenCalled();
+      expect(handler3).toHaveBeenCalled();
+    });
+
+    it('should handle event publishing with retries on failure', async () => {
+      await eventBus.initialize();
+
+      const failingHandler = jest.fn()
+        .mockRejectedValueOnce(new Error('Temporary failure'))
+        .mockResolvedValueOnce();
+
+      eventBus.subscribe(ORDER_EVENTS.ORDER_CREATED, failingHandler, { retry: true });
+
+      // First attempt should fail, but event should be retried
+      await eventBus.publish(ORDER_EVENTS.ORDER_CREATED, {
+        orderId: 'order-123'
+      });
+
+      // Wait for retry to complete
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Handler should be called twice (initial + retry)
+      expect(failingHandler).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('Event Performance Tests', () => {
+    it('should handle high volume of events', async () => {
+      await eventBus.initialize();
+
+      const handler = jest.fn().mockResolvedValue();
+      eventBus.subscribe(ORDER_EVENTS.ORDER_CREATED, handler);
+
+      const eventCount = 100;
+      const promises = [];
+
+      for (let i = 0; i < eventCount; i++) {
+        promises.push(
+          eventBus.publish(ORDER_EVENTS.ORDER_CREATED, {
+            orderId: `order-${i}`,
+            orderNumber: `ORD-${i.toString().padStart(3, '0')}`
+          })
+        );
+      }
+
+      await Promise.all(promises);
+
+      expect(handler).toHaveBeenCalledTimes(eventCount);
+      expect(mockEventStore.saveEvent).toHaveBeenCalledTimes(eventCount);
+    });
+
+    it('should handle concurrent event publishing', async () => {
+      await eventBus.initialize();
+
+      const handler = jest.fn().mockResolvedValue();
+      eventBus.subscribe(ORDER_EVENTS.ORDER_CREATED, handler);
+
+      const concurrentEvents = [
+        eventBus.publish(ORDER_EVENTS.ORDER_CREATED, { orderId: 'order-1' }),
+        eventBus.publish(ORDER_EVENTS.ORDER_CREATED, { orderId: 'order-2' }),
+        eventBus.publish(ORDER_EVENTS.ORDER_CREATED, { orderId: 'order-3' }),
+        eventBus.publish(ORDER_EVENTS.ORDER_CREATED, { orderId: 'order-4' }),
+        eventBus.publish(ORDER_EVENTS.ORDER_CREATED, { orderId: 'order-5' })
+      ];
+
+      await Promise.all(concurrentEvents);
+
+      expect(handler).toHaveBeenCalledTimes(5);
+      expect(mockEventStore.saveEvent).toHaveBeenCalledTimes(5);
     });
   });
 });

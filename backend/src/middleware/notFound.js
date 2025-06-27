@@ -1,4 +1,4 @@
-const { AppError } = require('./errorHandler');
+const AppError = require('../utils/appError');
 
 const notFound = (req, res, next) => {
   const message = `Can't find ${req.originalUrl} on this server!`;

@@ -1,6 +1,6 @@
 const BaseRepository = require('./BaseRepository');
 const User = require('../models/User');
-const { AppError } = require('../middleware/errorHandler');
+const AppError = require('../utils/appError');
 const logger = require('../config/logger');
 
 class UserRepository extends BaseRepository {

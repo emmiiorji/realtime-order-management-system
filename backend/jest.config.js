@@ -2,6 +2,8 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: [
+    '**/src/tests/**/*.test.js',
+    '**/src/tests/**/*.spec.js',
     '**/__tests__/**/*.js',
     '**/?(*.)+(spec|test).js'
   ],
@@ -18,7 +20,7 @@ module.exports = {
     'html'
   ],
   setupFilesAfterEnv: ['<rootDir>/src/tests/setup.js'],
-  testTimeout: 10000,
+  testTimeout: 30000,
   verbose: true,
   clearMocks: true,
   restoreMocks: true

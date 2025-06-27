@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { AppError, catchAsync } = require('./errorHandler');
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 const securityConfig = require('../config/security');
 const UserRepository = require('../repositories/UserRepository');
 

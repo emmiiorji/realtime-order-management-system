@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { AppError } = require('./errorHandler');
+const AppError = require('../utils/appError')
 
 // User validation schemas
 const userSchema = Joi.object({
@@ -125,7 +125,6 @@ const shippingAddressSchema = Joi.object({
 });
 
 const orderSchema = Joi.object({
-  userId: Joi.string().required(),
   items: Joi.array().items(orderItemSchema).min(1).required(),
   shippingAddress: shippingAddressSchema.required(),
   billingAddress: shippingAddressSchema.optional(),
@@ -148,7 +147,8 @@ const orderSchema = Joi.object({
     type: Joi.string().valid('percentage', 'fixed', 'free_shipping').optional()
   }).optional(),
   notes: Joi.string().optional(),
-  customerNotes: Joi.string().optional()
+  customerNotes: Joi.string().optional(),
+  metadata: Joi.object().optional()
 });
 
 const orderUpdateSchema = Joi.object({
@@ -180,6 +180,25 @@ const orderUpdateSchema = Joi.object({
   notes: Joi.string().optional(),
   internalNotes: Joi.string().optional()
 }).min(1);
+
+// Payment validation schemas
+const paymentIntentSchema = Joi.object({
+  amount: Joi.number().min(1).required(),
+  currency: Joi.string().length(3).default('usd'),
+  orderId: Joi.string().optional(),
+  metadata: Joi.object().optional()
+});
+
+const paymentConfirmationSchema = Joi.object({
+  paymentIntentId: Joi.string().required(),
+  paymentMethodId: Joi.string().required()
+});
+
+const refundSchema = Joi.object({
+  paymentIntentId: Joi.string().required(),
+  amount: Joi.number().min(1).optional(),
+  reason: Joi.string().valid('duplicate', 'fraudulent', 'requested_by_customer').default('requested_by_customer')
+});
 
 // Validation middleware factory
 const validate = (schema) => {
@@ -266,12 +285,17 @@ module.exports = {
       .min(6)
       .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])'))
       .required();
-    
+
     const { error } = passwordSchema.validate(password);
-    
+
     if (error) {
       return next(new AppError('Password must be at least 6 characters long and contain at least one lowercase letter, one uppercase letter, and one number', 400));
     }
     next();
-  }
+  },
+
+  // Payment validation middleware
+  validatePaymentIntent: validate(paymentIntentSchema),
+  validatePaymentConfirmation: validate(paymentConfirmationSchema),
+  validateRefund: validate(refundSchema)
 };

@@ -15,6 +15,7 @@ const ORDER_EVENTS = {
   ORDER_COMPLETED: 'order.completed',
   ORDER_PAYMENT_PROCESSED: 'order.payment.processed',
   ORDER_PAYMENT_FAILED: 'order.payment.failed',
+  ORDER_PAYMENT_REFUNDED: 'order.payment.refunded',
   ORDER_SHIPPED: 'order.shipped',
   ORDER_DELIVERED: 'order.delivered'
 };

@@ -1,6 +1,6 @@
 const UserRepository = require('../../repositories/UserRepository');
 const User = require('../../models/User');
-const { AppError } = require('../../middleware/errorHandler');
+const AppError = require('../../utils/appError');
 
 // Mock the User model
 jest.mock('../../models/User');
