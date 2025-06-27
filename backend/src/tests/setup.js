@@ -1,6 +1,6 @@
 // Mock environment variables
 process.env.NODE_ENV = 'test';
-process.env.MONGODB_URI = 'mongodb://localhost:27017/realtime-order-management-system-test';
+process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/realtime-order-management-system-test';
 process.env.REDIS_HOST = 'localhost';
 process.env.REDIS_PORT = '6379';
 process.env.JWT_SECRET = 'test_jwt_secret_1234567890_abcdef';

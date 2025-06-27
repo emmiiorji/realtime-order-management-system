@@ -1,6 +1,6 @@
 const logger = require('../../config/logger');
 const { ORDER_EVENTS, NOTIFICATION_EVENTS, INVENTORY_EVENTS } = require('../eventTypes');
-const eventBus = require('../eventBus');
+const { eventBus } = require('../eventBus');
 
 class OrderEventHandlers {
   constructor() {
