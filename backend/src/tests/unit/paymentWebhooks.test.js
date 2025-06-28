@@ -1,6 +1,5 @@
 const request = require('supertest');
 const express = require('express');
-const paymentController = require('../../controllers/paymentController');
 const Order = require('../../models/Order');
 const eventBus = require('../../events/eventBus');
 const logger = require('../../config/logger');
@@ -28,11 +27,16 @@ jest.mock('stripe', () => {
     };
   });
 
-  return jest.fn().mockImplementation(() => ({
+  const StripeMock = jest.fn().mockImplementation(() => ({
     webhooks: {
       constructEvent: constructEventMock
     }
   }));
+
+  // Store the constructEvent mock for easy access
+  StripeMock.constructEventMock = constructEventMock;
+
+  return StripeMock;
 });
 
 jest.mock('../../models/Order', () => ({
@@ -59,6 +63,9 @@ jest.mock('../../config/logger', () => ({
 const Stripe = require('stripe');
 const stripe = new Stripe('test_key');
 
+// Import payment controller after mocks are set up
+const paymentController = require('../../controllers/paymentController');
+
 // Setup Express app for testing
 const app = express();
 
@@ -81,11 +88,34 @@ describe('Payment Webhooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test123';
+    process.env.STRIPE_SECRET_KEY = 'sk_test_123';
 
     // Reset mocks
     Order.findOne.mockReset();
     eventBus.publish.mockReset();
-    stripe.webhooks.constructEvent.mockReset();
+    Stripe.constructEventMock.mockReset();
+
+    // Reset the default mock implementation
+    Stripe.constructEventMock.mockImplementation((payload, signature) => {
+      if (signature === 'invalid_signature') {
+        const error = new Error('Invalid signature');
+        error.type = 'StripeSignatureVerificationError';
+        throw error;
+      }
+      return {
+        type: 'payment_intent.succeeded',
+        data: {
+          object: {
+            id: 'pi_test123',
+            amount: 2000,
+            metadata: {
+              userId: 'test-user-123',
+              orderId: 'order-123'
+            }
+          }
+        }
+      };
+    });
   });
 
   it('should handle signature verification failure', async () => {
@@ -136,7 +166,7 @@ describe('Payment Webhooks', () => {
   });
 
   it('should handle payment success without orderId in metadata', async () => {
-    stripe.webhooks.constructEvent.mockImplementationOnce(() => ({
+    Stripe.constructEventMock.mockImplementationOnce(() => ({
       type: 'payment_intent.succeeded',
       data: {
         object: {
@@ -169,7 +199,7 @@ describe('Payment Webhooks', () => {
       save: jest.fn().mockResolvedValue(undefined)
     };
 
-    stripe.webhooks.constructEvent.mockImplementationOnce(() => ({
+    Stripe.constructEventMock.mockImplementationOnce(() => ({
       type: 'payment_intent.payment_failed',
       data: {
         object: {

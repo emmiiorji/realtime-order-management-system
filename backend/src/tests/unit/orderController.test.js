@@ -82,7 +82,7 @@ describe('Order Controller', () => {
       items: [
         {
           productId: 'prod-123',
-          name: 'Test Product',
+          productName: 'Test Product',
           quantity: 2,
           unitPrice: 10.00,
           sku: 'TEST-SKU-001'
@@ -213,14 +213,14 @@ describe('Order Controller', () => {
         items: [
           {
             productId: 'prod-123',
-            name: 'Product 1',
+            productName: 'Product 1',
             quantity: 2,
             unitPrice: 10.00,
             sku: 'SKU-001'
           },
           {
             productId: 'prod-456',
-            name: 'Product 2',
+            productName: 'Product 2',
             quantity: 1,
             unitPrice: 15.00,
             sku: 'SKU-002'
@@ -232,7 +232,10 @@ describe('Order Controller', () => {
         id: 'order-123',
         orderNumber: 'ORD-001',
         userId: 'test-user-123',
-        items: orderDataWithMultipleItems.items,
+        items: orderDataWithMultipleItems.items.map(item => ({
+          ...item,
+          totalPrice: item.quantity * item.unitPrice
+        })),
         totalAmount: 35.00,
         status: 'pending'
       };
@@ -240,11 +243,21 @@ describe('Order Controller', () => {
       Order.create.mockResolvedValue(mockOrder);
       eventBus.publish.mockResolvedValue();
 
-      await request(app)
+      // Debug: Check if mocks are working
+      console.log('Order.create mock setup:', Order.create.getMockName());
+      console.log('eventBus.publish mock setup:', eventBus.publish.getMockName());
+
+      const response = await request(app)
         .post('/orders')
         .set('x-user-id', 'test-user-123')
-        .send(orderDataWithMultipleItems)
-        .expect(201);
+        .send(orderDataWithMultipleItems);
+
+      if (response.status !== 201) {
+        console.log('Error response:', response.body);
+        console.log('Status:', response.status);
+      }
+
+      expect(response.status).toBe(201);
 
       expect(Order.create).toHaveBeenCalledWith(
         expect.objectContaining({
