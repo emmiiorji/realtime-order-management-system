@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import OrderService from '../../services/orderService';
 import EventService from '../../services/eventService';
+import OrderForm from '../OrderForm';
 import type { Order, Event } from '../../services/api';
 
 export function Dashboard() {
-  const { state } = useApp();
+  const { state, addNotification } = useApp();
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [recentEvents, setRecentEvents] = useState<Event[]>([]);
+  const [showOrderForm, setShowOrderForm] = useState(false);
   const [stats, setStats] = useState({
     totalOrders: 0,
     pendingOrders: 0,
@@ -53,6 +55,24 @@ export function Dashboard() {
     }
   };
 
+  const handleOrderSuccess = (order: Order) => {
+    addNotification({
+      type: 'success',
+      title: 'Order Created Successfully',
+      message: `Order #${order.orderNumber} has been created and is being processed.`,
+    });
+    setShowOrderForm(false);
+    loadDashboardData(); // Refresh the dashboard data
+  };
+
+  const handleOrderError = (error: string) => {
+    addNotification({
+      type: 'error',
+      title: 'Order Creation Failed',
+      message: error,
+    });
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -93,12 +113,25 @@ export function Dashboard() {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Welcome back, {state.user?.firstName || state.user?.username}!
-        </h1>
-        <p className="text-gray-600">
-          Here's what's happening with your account today.
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Welcome back, {state.user?.firstName || state.user?.username}!
+            </h1>
+            <p className="text-gray-600">
+              Here's what's happening with your account today.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowOrderForm(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200 flex items-center space-x-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <span>Create New Order</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -245,6 +278,30 @@ export function Dashboard() {
           }`}></div>
         </div>
       </div>
+
+      {/* Order Form Modal */}
+      {showOrderForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Create New Order</h3>
+              <button
+                onClick={() => setShowOrderForm(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Close order form"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <OrderForm
+              onSuccess={handleOrderSuccess}
+              onError={handleOrderError}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

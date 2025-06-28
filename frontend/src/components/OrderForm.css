@@ -1,0 +1,222 @@
+/* OrderForm Styles */
+.order-form {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.order-form__section {
+  margin-bottom: 2rem;
+}
+
+.order-form__section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+.order-form__item {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #f9fafb;
+}
+
+.order-form__item-fields {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.order-form__item input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.order-form__item input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.order-form__remove-item {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.order-form__remove-item:hover {
+  background-color: #dc2626;
+}
+
+.order-form__remove-item:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.order-form__add-item {
+  background-color: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 1rem;
+}
+
+.order-form__add-item:hover {
+  background-color: #059669;
+}
+
+.order-form__add-item:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.order-form__address-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.order-form__address-fields input,
+.order-form__address-fields select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.order-form__address-fields input:focus,
+.order-form__address-fields select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.order-form__totals {
+  background-color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.order-form__totals h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.order-form__total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.order-form__total-row:last-child {
+  border-top: 1px solid #d1d5db;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+.order-form__submit {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.order-form__submit:hover {
+  background-color: #2563eb;
+}
+
+.order-form__submit:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.order-form__error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #fecaca;
+  margin-bottom: 1rem;
+}
+
+.order-form__section select,
+.order-form__section textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.order-form__section select:focus,
+.order-form__section textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.order-form__summary {
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid #e5e7eb;
+}
+
+.order-form__summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.order-form__summary-total {
+  border-top: 1px solid #d1d5db;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.order-form__actions {
+  margin-top: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .order-form__item-fields {
+    grid-template-columns: 1fr;
+  }
+  
+  .order-form__address-fields {
+    grid-template-columns: 1fr;
+  }
+}

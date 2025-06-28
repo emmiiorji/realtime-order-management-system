@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { OrderService } from '../services/orderService';
 import type { CreateOrderRequest, Order, OrderItem, ShippingAddress } from '../services/api';
+import './OrderForm.css';
 
 interface OrderFormProps {
   onSuccess?: (order: Order) => void;
