@@ -31,7 +31,7 @@ This project showcases a complete real-time order management system featuring:
 - **Rate Limiting**: API rate limiting for security and abuse prevention
 - **Health Checks**: System health monitoring endpoints with detailed status information
 
-### Frontend Features
+### Frontend Features (Minimal Styling)
 - **Modern React**: Built with React 18 and TypeScript with latest best practices
 - **Payment Integration**: Complete Stripe Elements integration with payment forms and status displays
 - **Order Management**: Comprehensive order creation, tracking, and management interface
