@@ -420,6 +420,8 @@ All sensitive data is managed through environment variables:
 ## 🔮 Future Improvements
 
 ### UI/UX Enhancements
+- **Responsive Design**: Improve mobile and tablet responsiveness
+- **Customizable UI**: Allow users to customize their dashboard and settings
 - **Advanced Dashboard**: Enhanced analytics with charts and data visualizations
 - **Mobile App**: Native mobile application for iOS and Android
 - **Improved Accessibility**: WCAG 2.1 compliance and screen reader support
