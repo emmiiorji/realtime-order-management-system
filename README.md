@@ -321,7 +321,7 @@ CORS_ORIGIN=http://localhost:3000
 
 # Stripe Configuration
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret_here
 FRONTEND_URL=http://localhost:3000
 ```
 

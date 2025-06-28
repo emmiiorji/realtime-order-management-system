@@ -61,7 +61,7 @@ describe('End-to-End Order and Payment Flow', () => {
     mockPaymentService.formatAmount.mockReturnValue('$20.00');
     mockPaymentService.getPaymentStatusText.mockReturnValue('Payment successful');
     mockPaymentService.getPaymentStatusColor.mockReturnValue('#10b981');
-    mockPaymentService.getErrorMessage.mockImplementation((error) => error?.message || 'Unknown error');
+    mockPaymentService.getErrorMessage.mockImplementation((error: any) => error?.message || 'Unknown error');
   });
 
   describe('Complete Order-to-Payment Flow', () => {
@@ -411,19 +411,22 @@ describe('End-to-End Order and Payment Flow', () => {
           id: 'pi_succeeded',
           amount: 2000,
           currency: 'usd',
-          status: 'succeeded'
+          status: 'succeeded',
+          client_secret: 'pi_succeeded_secret'
         },
         {
           id: 'pi_processing',
           amount: 1500,
           currency: 'usd',
-          status: 'processing'
+          status: 'processing',
+          client_secret: 'pi_processing_secret'
         },
         {
           id: 'pi_failed',
           amount: 3000,
           currency: 'usd',
-          status: 'canceled'
+          status: 'canceled',
+          client_secret: 'pi_failed_secret'
         }
       ];
 

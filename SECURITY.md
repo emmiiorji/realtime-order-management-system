@@ -27,8 +27,8 @@ SESSION_SECRET=your-session-secret-minimum-32-characters
 #### External Services
 ```env
 EMAIL_SERVICE_API_KEY=your-email-service-api-key
-PAYMENT_GATEWAY_SECRET=your-payment-gateway-secret
-WEBHOOK_SECRET=your-webhook-verification-secret
+STRIPE_SECRET_KEY=your-stripe-secret-key
+STRIPE_WEBHOOK_SECRET=your-webhook-verification-secret
 ```
 
 ### Secret Generation

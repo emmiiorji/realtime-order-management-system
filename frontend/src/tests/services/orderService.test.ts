@@ -16,7 +16,7 @@ describe('OrderService', () => {
       items: [
         {
           productId: 'prod-123',
-          name: 'Test Product',
+          productName: 'Test Product',
           quantity: 2,
           unitPrice: 10.00,
           sku: 'TEST-SKU-001'
@@ -32,7 +32,7 @@ describe('OrderService', () => {
         country: 'US'
       },
       payment: {
-        method: 'stripe',
+        method: 'stripe' as const,
         amount: 20.00,
         currency: 'USD'
       }
@@ -336,7 +336,7 @@ describe('OrderService', () => {
   describe('updateOrderStatus (Admin)', () => {
     it('should update order status successfully', async () => {
       const statusData = {
-        status: 'shipped',
+        status: 'shipped' as const,
         reason: 'Order dispatched',
         notes: 'Tracking number: TRACK123'
       };

@@ -77,14 +77,14 @@ class SecurityConfig {
 
   getWebhookConfig() {
     return {
-      secret: process.env.WEBHOOK_SECRET || this.generateRandomKey()
+      secret: process.env._STRIPE_WEBHOOK_SECRET || this.generateRandomKey()
     };
   }
 
   getPaymentConfig() {
     return {
-      gatewaySecret: process.env.PAYMENT_GATEWAY_SECRET,
-      webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET
+      gatewaySecret: process.env.STRIPE_SECRET_KEY,
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
     };
   }
 

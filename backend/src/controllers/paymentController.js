@@ -6,11 +6,21 @@ const eventBus = require('../events/eventBus');
 const { ORDER_EVENTS } = require('../events/eventTypes');
 const logger = require('../config/logger');
 
-// Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Initialize Stripe with secret key (only if provided)
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+
+// Helper function to check if Stripe is configured
+const checkStripeConfiguration = () => {
+  if (!stripe) {
+    throw new AppError('Payment processing is not configured. Please contact support.', 503);
+  }
+};
 
 // Create payment intent
 exports.createPaymentIntent = catchAsync(async (req, res, next) => {
+  // Check if Stripe is configured
+  checkStripeConfiguration();
+
   const { amount, currency = 'usd', orderId, metadata = {} } = req.body;
   const userId = req.headers['x-user-id'];
 

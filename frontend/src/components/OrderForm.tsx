@@ -1,30 +1,12 @@
 import React, { useState } from 'react';
 import { OrderService } from '../services/orderService';
-import type { CreateOrderRequest, Order } from '../services/orderService';
+import type { CreateOrderRequest, Order, OrderItem, ShippingAddress } from '../services/api';
 
 interface OrderFormProps {
   onSuccess?: (order: Order) => void;
   onError?: (error: string) => void;
   initialData?: Partial<CreateOrderRequest>;
   disabled?: boolean;
-}
-
-interface OrderItem {
-  productId: string;
-  name: string;
-  quantity: number;
-  unitPrice: number;
-  sku: string;
-}
-
-interface ShippingAddress {
-  firstName: string;
-  lastName: string;
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
 }
 
 const OrderForm: React.FC<OrderFormProps> = ({
@@ -36,11 +18,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
   
-  const [items, setItems] = useState<OrderItem[]>(
+  const [items, setItems] = useState<Omit<OrderItem, 'totalPrice'>[]>(
     initialData?.items || [
       {
         productId: '',
-        name: '',
+        productName: '',
         quantity: 1,
         unitPrice: 0,
         sku: ''
@@ -71,7 +53,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
       ...items,
       {
         productId: '',
-        name: '',
+        productName: '',
         quantity: 1,
         unitPrice: 0,
         sku: ''
@@ -85,7 +67,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
   };
 
-  const updateItem = (index: number, field: keyof OrderItem, value: string | number) => {
+  const updateItem = (index: number, field: keyof Omit<OrderItem, 'totalPrice'>, value: string | number) => {
     const updatedItems = [...items];
     updatedItems[index] = {
       ...updatedItems[index],
@@ -122,7 +104,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
 
     for (const item of items) {
-      if (!item.productId || !item.name || item.quantity <= 0 || item.unitPrice <= 0) {
+      if (!item.productId || !item.productName || item.quantity <= 0 || item.unitPrice <= 0) {
         return 'All item fields are required and must be valid';
       }
     }
@@ -155,8 +137,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
     setError('');
 
     try {
-      const subtotal = calculateSubtotal();
-      const tax = calculateTax(subtotal);
       const total = calculateTotal();
 
       const orderData: CreateOrderRequest = {
@@ -168,9 +148,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
           amount: total,
           currency: 'USD'
         },
-        subtotal,
-        tax,
-        totalAmount: total,
         notes
       };
 
@@ -210,8 +187,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
               <input
                 type="text"
                 placeholder="Product Name"
-                value={item.name}
-                onChange={(e) => updateItem(index, 'name', e.target.value)}
+                value={item.productName}
+                onChange={(e) => updateItem(index, 'productName', e.target.value)}
                 disabled={disabled || isSubmitting}
                 required
               />
@@ -333,7 +310,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         <h3>Payment Method</h3>
         <select
           value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
+          onChange={(e) => setPaymentMethod(e.target.value as any)}
           disabled={disabled || isSubmitting}
           required
         >
@@ -370,7 +347,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
       </div>
 
       {error && (
-        <div className="order-form__error">
+        <div className="order-form__error" data-testid="order-form-error">
           {error}
         </div>
       )}

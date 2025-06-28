@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import OrderForm from '../../components/OrderForm';
@@ -42,7 +42,7 @@ describe('OrderForm', () => {
       items: [
         {
           productId: 'prod-123',
-          name: 'Test Product',
+          productName: 'Test Product',
           quantity: 2,
           unitPrice: 10.00,
           sku: 'TEST-SKU'
@@ -58,7 +58,7 @@ describe('OrderForm', () => {
         country: 'US'
       },
       payment: {
-        method: 'paypal',
+        method: 'paypal' as const,
         amount: 20.00,
         currency: 'USD'
       },
@@ -90,8 +90,8 @@ describe('OrderForm', () => {
     expect(screen.getAllByPlaceholderText('Product ID')).toHaveLength(2);
 
     // Remove item
-    const removeButton = screen.getByRole('button', { name: /remove/i });
-    fireEvent.click(removeButton);
+    const removeButtons = screen.getAllByRole('button', { name: /remove/i });
+    fireEvent.click(removeButtons[0]);
 
     expect(screen.getAllByPlaceholderText('Product ID')).toHaveLength(1);
   });
@@ -192,7 +192,7 @@ describe('OrderForm', () => {
           items: [
             expect.objectContaining({
               productId: 'prod-123',
-              name: 'Test Product',
+              productName: 'Test Product',
               sku: 'TEST-SKU',
               quantity: 1,
               unitPrice: 10.00
@@ -211,10 +211,7 @@ describe('OrderForm', () => {
             method: 'stripe',
             amount: 10.80, // 10.00 + 0.80 tax
             currency: 'USD'
-          }),
-          subtotal: 10.00,
-          tax: 0.80,
-          totalAmount: 10.80
+          })
         })
       );
     });
@@ -230,7 +227,8 @@ describe('OrderForm', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/all item fields are required/i)).toBeInTheDocument();
+      expect(screen.getByTestId('order-form-error')).toBeInTheDocument();
+      expect(screen.getByTestId('order-form-error')).toHaveTextContent(/All item fields are required and must be valid/i);
     });
 
     expect(defaultProps.onError).toHaveBeenCalledWith(

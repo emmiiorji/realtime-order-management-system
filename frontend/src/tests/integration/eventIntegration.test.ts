@@ -35,7 +35,7 @@ describe('Event Integration Tests', () => {
         items: [
           {
             productId: 'prod-123',
-            name: 'Test Product',
+            productName: 'Test Product',
             quantity: 2,
             unitPrice: 10.00
           }
@@ -78,7 +78,7 @@ describe('Event Integration Tests', () => {
           country: 'US'
         },
         payment: {
-          method: 'stripe',
+          method: 'stripe' as const,
           amount: 20.00,
           currency: 'USD'
         }
@@ -109,16 +109,7 @@ describe('Event Integration Tests', () => {
     });
 
     it('should handle payment success and order update flow', async () => {
-      // Mock successful payment processing
-      const mockPaymentResult = {
-        success: true,
-        paymentIntent: {
-          id: 'pi_test123',
-          status: 'succeeded',
-          amount: 2000,
-          currency: 'usd'
-        }
-      };
+      // Mock successful payment processing - payment result would be used in real implementation
 
       // Mock order status update
       const mockUpdatedOrder = {
@@ -139,10 +130,10 @@ describe('Event Integration Tests', () => {
 
       // Simulate payment success triggering order update
       const updateResult = await OrderService.updateOrder('order-123', {
-        status: 'confirmed',
         payment: {
-          status: 'completed',
-          transactionId: 'pi_test123'
+          method: 'stripe',
+          amount: 20.00,
+          currency: 'USD'
         }
       });
 
@@ -152,11 +143,7 @@ describe('Event Integration Tests', () => {
     });
 
     it('should handle payment failure and order cancellation flow', async () => {
-      // Mock payment failure
-      const mockPaymentResult = {
-        success: false,
-        error: 'Your card was declined.'
-      };
+      // Mock payment failure - payment result would be used in real implementation
 
       // Mock order cancellation
       const mockCancelledOrder = {
@@ -206,7 +193,7 @@ describe('Event Integration Tests', () => {
 
     it('should handle order status update events', () => {
       const eventHandlers = new Map();
-      let messageHandler: Function;
+      let messageHandler: Function | undefined;
 
       mockWebSocket.addEventListener.mockImplementation((event, handler) => {
         if (event === 'message') {
@@ -246,7 +233,7 @@ describe('Event Integration Tests', () => {
 
     it('should handle payment status update events', () => {
       const eventHandlers = new Map();
-      let messageHandler: Function;
+      let messageHandler: Function | undefined;
 
       mockWebSocket.addEventListener.mockImplementation((event, handler) => {
         if (event === 'message') {
@@ -301,7 +288,7 @@ describe('Event Integration Tests', () => {
 
       // Attempt to create order
       await expect(OrderService.createOrder({
-        items: [{ productId: 'prod-123', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: 'prod-123', productName: 'Test Product', quantity: 1, unitPrice: 10 }],
         shippingAddress: {} as any,
         payment: { method: 'stripe', amount: 10, currency: 'USD' }
       })).rejects.toMatchObject({
@@ -317,7 +304,7 @@ describe('Event Integration Tests', () => {
 
     it('should handle WebSocket connection failures', () => {
       const eventHandlers = new Map();
-      let errorHandler: Function;
+      let errorHandler: Function | undefined;
 
       mockWebSocket.addEventListener.mockImplementation((event, handler) => {
         if (event === 'error') {
@@ -363,7 +350,7 @@ describe('Event Integration Tests', () => {
 
       // Create order successfully
       const orderResult = await OrderService.createOrder({
-        items: [{ productId: 'prod-123', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: 'prod-123', productName: 'Test Product', quantity: 1, unitPrice: 10 }],
         shippingAddress: {} as any,
         payment: { method: 'stripe', amount: 10, currency: 'USD' }
       });
@@ -392,7 +379,7 @@ describe('Event Integration Tests', () => {
       const events: string[] = [];
 
       // Mock order creation
-      mockedApi.post.mockImplementation((url) => {
+      mockedApi.post.mockImplementation((url: any) => {
         if (url === '/orders') {
           events.push('order_created');
           return Promise.resolve({
@@ -428,7 +415,9 @@ describe('Event Integration Tests', () => {
       // Execute sequence
       await OrderService.createOrder({} as any);
       await PaymentService.createPaymentIntent({ amount: 1000, currency: 'usd' });
-      await OrderService.updateOrder('order-123', { status: 'confirmed' });
+      await OrderService.updateOrder('order-123', {
+        payment: { method: 'stripe', amount: 1000, currency: 'usd' }
+      });
 
       expect(events).toEqual([
         'order_created',
@@ -441,7 +430,7 @@ describe('Event Integration Tests', () => {
       const results: string[] = [];
 
       // Mock concurrent API calls
-      mockedApi.get.mockImplementation((url) => {
+      mockedApi.get.mockImplementation((url: any) => {
         const delay = Math.random() * 100; // Random delay
         return new Promise(resolve => {
           setTimeout(() => {

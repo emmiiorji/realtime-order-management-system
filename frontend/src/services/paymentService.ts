@@ -1,4 +1,4 @@
-import { loadStripe, Stripe } from '@stripe/stripe-js';
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { api } from './api';
 import type { ApiResponse } from './api';
 
@@ -11,6 +11,7 @@ export interface PaymentIntent {
   currency: string;
   status: string;
   client_secret: string;
+  payment_method?: string;
 }
 
 export interface CreatePaymentIntentRequest {
