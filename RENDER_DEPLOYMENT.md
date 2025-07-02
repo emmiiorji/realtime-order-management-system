@@ -64,16 +64,11 @@ Go to your backend service settings and add these environment variables:
 **Required Database Variables:**
 ```
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/order_management_db
-REDIS_HOST=your-redis-host.com
-REDIS_PASSWORD=your-redis-password
 ```
 
-**Alternative Redis Configuration (if using full URL):**
-```
-REDIS_URL=redis://username:password@host:port
-```
-
-**Note:** Use either individual Redis settings (HOST/PASSWORD) OR the full REDIS_URL, not both.
+**Note:**
+- Redis is automatically configured as an internal service
+- CORS_ORIGIN is automatically set to the frontend service URL
 
 **Optional External Service Variables:**
 ```

@@ -1,4 +1,13 @@
 services:
+  # Redis Cache Service - Internal Container (defined first since backend references it)
+  - type: redis
+    name: realtime-order-management-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow access from all Render services
+
   # Backend API Service
   - type: web
     name: realtime-order-management-backend
@@ -39,6 +48,7 @@ services:
         fromService:
           type: web
           name: realtime-order-management-frontend
+          property: url
       - key: RATE_LIMIT_WINDOW_MS
         value: 900000
       - key: RATE_LIMIT_MAX_REQUESTS
@@ -58,25 +68,18 @@ services:
         fromService:
           type: web
           name: realtime-order-management-backend
+          property: url
       - key: VITE_WS_URL
         fromService:
           type: web
           name: realtime-order-management-backend
+          property: url
       - key: VITE_APP_NAME
         value: Real-time Order Management System
       - key: VITE_APP_VERSION
         value: 1.0.0
       - key: NODE_ENV
         value: production
-
-  # Redis Cache Service - Internal Container
-  - type: redis
-    name: realtime-order-management-redis
-    plan: starter
-    maxmemoryPolicy: allkeys-lru
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: Allow access from all Render services
 
 # Note: MongoDB is external, Redis is managed by Render
 # Configure MongoDB connection in the Render dashboard
