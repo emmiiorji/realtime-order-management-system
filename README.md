@@ -89,7 +89,7 @@ This project showcases a complete real-time order management system featuring:
 - **MongoDB** (if running locally)
 - **Redis** (if running locally)
 
-### For Cloud Deployment (e.g Render)
+### For Cloud Deployment (Render Recommended)
 - **GitHub/GitLab** account with your code repository
 - **External MongoDB** database (MongoDB Atlas, DigitalOcean, etc.)
 - **Stripe** account for payment processing
@@ -405,7 +405,7 @@ All sensitive data is managed through environment variables:
 
 ## 🚀 Deployment
 
-### Cloud Deployment (e.g Render)
+### Cloud Deployment (Render Recommended)
 
 Deploy to Render using the included Blueprint configuration for a fully managed cloud deployment.
 

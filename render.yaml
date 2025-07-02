@@ -48,7 +48,7 @@ services:
         fromService:
           type: web
           name: realtime-order-management-frontend
-          property: url
+          property: host
       - key: RATE_LIMIT_WINDOW_MS
         value: 900000
       - key: RATE_LIMIT_MAX_REQUESTS
@@ -68,12 +68,12 @@ services:
         fromService:
           type: web
           name: realtime-order-management-backend
-          property: url
+          property: host
       - key: VITE_WS_URL
         fromService:
           type: web
           name: realtime-order-management-backend
-          property: url
+          property: host
       - key: VITE_APP_NAME
         value: Real-time Order Management System
       - key: VITE_APP_VERSION

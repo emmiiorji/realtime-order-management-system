@@ -1,8 +1,22 @@
 import axios from "axios";
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.VITE_BACKEND_URL ? `${import.meta.env.VITE_BACKEND_URL}/api` : "http://localhost:3001/api");
+const getBackendUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+
+  if (import.meta.env.VITE_BACKEND_URL) {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    // If it's just a hostname (from Render's host property), add https://
+    const fullUrl = backendUrl.startsWith('http') ? backendUrl : `https://${backendUrl}`;
+    return `${fullUrl}/api`;
+  }
+
+  return "http://localhost:3001/api";
+};
+
+const API_BASE_URL = getBackendUrl();
 
 // Create axios instance
 const apiClient = axios.create({

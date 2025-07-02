@@ -64,12 +64,22 @@ class Application {
     this.app.use(helmet());
 
     // CORS configuration
+    const getCorsOrigin = () => {
+      if (!process.env.CORS_ORIGIN) {
+        return ["http://localhost:3000", "http://localhost:5173"];
+      }
+
+      const corsOrigin = process.env.CORS_ORIGIN;
+      // If it's just a hostname (from Render's host property), add https://
+      if (!corsOrigin.startsWith('http')) {
+        return `https://${corsOrigin}`;
+      }
+      return corsOrigin;
+    };
+
     this.app.use(
       cors({
-        origin: process.env.CORS_ORIGIN || [
-          "http://localhost:3000",
-          "http://localhost:5173",
-        ],
+        origin: getCorsOrigin(),
         credentials: true,
       })
     );
@@ -136,10 +146,23 @@ class Application {
   }
 
   setupSocketIO() {
+    const getCorsOrigin = () => {
+      if (!process.env.CORS_ORIGIN) {
+        return "http://localhost:3000";
+      }
+
+      const corsOrigin = process.env.CORS_ORIGIN;
+      // If it's just a hostname (from Render's host property), add https://
+      if (!corsOrigin.startsWith('http')) {
+        return `https://${corsOrigin}`;
+      }
+      return corsOrigin;
+    };
+
     this.server = createServer(this.app);
     this.io = new Server(this.server, {
       cors: {
-        origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+        origin: getCorsOrigin(),
         methods: ["GET", "POST"],
       },
     });
