@@ -1,32 +1,35 @@
-import { useState } from 'react';
-import UserService from '../../services/userService';
-import { useApp } from '../../contexts/AppContext';
+import { useState } from "react";
+import UserService from "../../services/userService";
+import { useApp } from "../../contexts/AppContext";
 
 interface RegisterFormProps {
   onSuccess?: () => void;
   onSwitchToLogin?: () => void;
 }
 
-export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) {
+export function RegisterForm({
+  onSuccess,
+  onSwitchToLogin,
+}: RegisterFormProps) {
   const { addNotification } = useApp();
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -34,39 +37,40 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
     const newErrors: Record<string, string> = {};
 
     if (!formData.username) {
-      newErrors.username = 'Username is required';
+      newErrors.username = "Username is required";
     } else if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
+      newErrors.username = "Username must be at least 3 characters";
     } else if (!/^[a-zA-Z0-9]+$/.test(formData.username)) {
-      newErrors.username = 'Username can only contain letters and numbers';
+      newErrors.username = "Username can only contain letters and numbers";
     }
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/.test(formData.password)) {
-      newErrors.password = 'Password must contain at least one lowercase letter, one uppercase letter, and one number';
+      newErrors.password =
+        "Password must contain at least one lowercase letter, one uppercase letter, and one number";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (!formData.firstName) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = "First name is required";
     }
 
     if (!formData.lastName) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = "Last name is required";
     }
 
     setErrors(newErrors);
@@ -75,7 +79,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -92,18 +96,19 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
       });
 
       addNotification({
-        type: 'success',
-        title: 'Registration Successful',
-        message: 'Your account has been created successfully. Please sign in.',
+        type: "success",
+        title: "Registration Successful",
+        message: "Your account has been created successfully. Please sign in.",
       });
 
       onSuccess?.();
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Registration failed';
-      
+      const errorMessage =
+        error.response?.data?.message || "Registration failed";
+
       addNotification({
-        type: 'error',
-        title: 'Registration Failed',
+        type: "error",
+        title: "Registration Failed",
         message: errorMessage,
       });
 
@@ -111,9 +116,9 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
       if (error.response?.data?.errors) {
         const apiErrors: Record<string, string> = {};
         error.response.data.errors.forEach((err: string) => {
-          if (err.includes('email')) apiErrors.email = err;
-          if (err.includes('username')) apiErrors.username = err;
-          if (err.includes('password')) apiErrors.password = err;
+          if (err.includes("email")) apiErrors.email = err;
+          if (err.includes("username")) apiErrors.username = err;
+          if (err.includes("password")) apiErrors.password = err;
         });
         setErrors(apiErrors);
       }
@@ -123,15 +128,30 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-        Create Account
-      </h2>
+    <div className="card">
+      <div className="card-header">
+        <h2>Create Account</h2>
+        <p
+          style={{
+            color: "var(--color-gray-600)",
+            fontSize: "var(--font-size-sm)",
+            marginTop: "var(--spacing-2)",
+          }}
+        >
+          Fill in your details to create a new account
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "var(--spacing-4)",
+          }}
+        >
+          <div className="form-group">
+            <label htmlFor="firstName" className="form-label">
               First Name
             </label>
             <input
@@ -140,19 +160,21 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.firstName ? 'border-red-500' : 'border-gray-300'
-              }`}
               placeholder="First name"
               disabled={isLoading}
+              style={{
+                borderColor: errors.firstName
+                  ? "var(--color-error)"
+                  : undefined,
+              }}
             />
             {errors.firstName && (
-              <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+              <p className="form-error">{errors.firstName}</p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="form-group">
+            <label htmlFor="lastName" className="form-label">
               Last Name
             </label>
             <input
@@ -161,20 +183,18 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.lastName ? 'border-red-500' : 'border-gray-300'
-              }`}
               placeholder="Last name"
               disabled={isLoading}
+              style={{
+                borderColor: errors.lastName ? "var(--color-error)" : undefined,
+              }}
             />
-            {errors.lastName && (
-              <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
-            )}
+            {errors.lastName && <p className="form-error">{errors.lastName}</p>}
           </div>
         </div>
 
-        <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="username" className="form-label">
             Username
           </label>
           <input
@@ -183,19 +203,17 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.username ? 'border-red-500' : 'border-gray-300'
-            }`}
             placeholder="Choose a username"
             disabled={isLoading}
+            style={{
+              borderColor: errors.username ? "var(--color-error)" : undefined,
+            }}
           />
-          {errors.username && (
-            <p className="mt-1 text-sm text-red-600">{errors.username}</p>
-          )}
+          {errors.username && <p className="form-error">{errors.username}</p>}
         </div>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="email" className="form-label">
             Email Address
           </label>
           <input
@@ -204,19 +222,17 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
-            }`}
             placeholder="Enter your email"
             disabled={isLoading}
+            style={{
+              borderColor: errors.email ? "var(--color-error)" : undefined,
+            }}
           />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-          )}
+          {errors.email && <p className="form-error">{errors.email}</p>}
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="password" className="form-label">
             Password
           </label>
           <input
@@ -225,19 +241,17 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.password ? 'border-red-500' : 'border-gray-300'
-            }`}
             placeholder="Create a password"
             disabled={isLoading}
+            style={{
+              borderColor: errors.password ? "var(--color-error)" : undefined,
+            }}
           />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-          )}
+          {errors.password && <p className="form-error">{errors.password}</p>}
         </div>
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="confirmPassword" className="form-label">
             Confirm Password
           </label>
           <input
@@ -246,40 +260,63 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-            }`}
             placeholder="Confirm your password"
             disabled={isLoading}
+            style={{
+              borderColor: errors.confirmPassword
+                ? "var(--color-error)"
+                : undefined,
+            }}
           />
           {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+            <p className="form-error">{errors.confirmPassword}</p>
           )}
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-primary"
+          style={{
+            width: "100%",
+            padding: "var(--spacing-4) var(--spacing-6)",
+            fontSize: "var(--font-size-base)",
+            fontWeight: "var(--font-weight-medium)",
+          }}
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div
+                className="spinner"
+                style={{ marginRight: "var(--spacing-2)" }}
+              ></div>
               Creating Account...
             </div>
           ) : (
-            'Create Account'
+            "Create Account"
           )}
         </button>
       </form>
 
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
-          Already have an account?{' '}
+      <div style={{ marginTop: "var(--spacing-6)", textAlign: "center" }}>
+        <p
+          style={{
+            fontSize: "var(--font-size-sm)",
+            color: "var(--color-gray-600)",
+          }}
+        >
+          Already have an account?{" "}
           <button
             type="button"
             onClick={onSwitchToLogin}
-            className="text-blue-600 hover:text-blue-500 font-medium"
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--color-primary)",
+              fontWeight: "var(--font-weight-medium)",
+              cursor: "pointer",
+              padding: 0,
+            }}
           >
             Sign in
           </button>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useApp } from '../../contexts/AppContext';
+import { useState } from "react";
+import { useApp } from "../../contexts/AppContext";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -9,18 +9,18 @@ interface LoginFormProps {
 export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
   const { login, state } = useApp();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -28,15 +28,15 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     }
 
     setErrors(newErrors);
@@ -45,7 +45,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -55,26 +55,31 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
       onSuccess?.();
     } catch (error) {
       // Error is handled in the context
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-        Sign In
-      </h2>
-      
-      {state.error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {state.error}
-        </div>
-      )}
+    <div className="card">
+      <div className="card-header">
+        <h2>Sign In / Sign Up</h2>
+        <p
+          style={{
+            color: "var(--color-gray-600)",
+            fontSize: "var(--font-size-sm)",
+            marginTop: "var(--spacing-2)",
+          }}
+        >
+          If you don't have an account, one will be created automatically.
+        </p>
+      </div>
+
+      {state.error && <div className="alert alert-error">{state.error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
+        <div className="form-group">
+          <label htmlFor="email" className="form-label">
+            Username
           </label>
           <input
             type="email"
@@ -82,19 +87,18 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Enter your email"
+            className={errors.email ? "error" : ""}
+            placeholder="Username"
             disabled={state.isLoading}
+            style={{
+              borderColor: errors.email ? "var(--color-error)" : undefined,
+            }}
           />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-          )}
+          {errors.email && <p className="form-error">{errors.email}</p>}
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="password" className="form-label">
             Password
           </label>
           <input
@@ -103,57 +107,75 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.password ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Enter your password"
+            className={errors.password ? "error" : ""}
+            placeholder="Password"
             disabled={state.isLoading}
+            style={{
+              borderColor: errors.password ? "var(--color-error)" : undefined,
+            }}
           />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-          )}
+          {errors.password && <p className="form-error">{errors.password}</p>}
         </div>
 
         <button
           type="submit"
           disabled={state.isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-primary"
+          style={{
+            width: "100%",
+            padding: "var(--spacing-4) var(--spacing-6)",
+            fontSize: "var(--font-size-base)",
+            fontWeight: "var(--font-weight-medium)",
+          }}
         >
           {state.isLoading ? (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div
+                className="spinner"
+                style={{ marginRight: "var(--spacing-2)" }}
+              ></div>
               Signing In...
             </div>
           ) : (
-            'Sign In'
+            "Sign In / Sign Up"
           )}
         </button>
       </form>
 
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
-          Don't have an account?{' '}
+      <div style={{ marginTop: "var(--spacing-6)", textAlign: "center" }}>
+        <p
+          style={{
+            fontSize: "var(--font-size-sm)",
+            color: "var(--color-gray-600)",
+          }}
+        >
+          Username: 3-20 characters, Password: 6+ characters
+        </p>
+      </div>
+
+      <div style={{ marginTop: "var(--spacing-6)", textAlign: "center" }}>
+        <p
+          style={{
+            fontSize: "var(--font-size-sm)",
+            color: "var(--color-gray-600)",
+          }}
+        >
+          Don't have an account?{" "}
           <button
             type="button"
             onClick={onSwitchToRegister}
-            className="text-blue-600 hover:text-blue-500 font-medium"
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--color-primary)",
+              fontWeight: "var(--font-weight-medium)",
+              cursor: "pointer",
+              padding: 0,
+            }}
           >
             Sign up
           </button>
         </p>
-      </div>
-
-      <div className="mt-4 text-center">
-        <button
-          type="button"
-          className="text-sm text-blue-600 hover:text-blue-500"
-          onClick={() => {
-            // TODO: Implement forgot password
-            alert('Forgot password functionality not implemented yet');
-          }}
-        >
-          Forgot your password?
-        </button>
       </div>
     </div>
   );
