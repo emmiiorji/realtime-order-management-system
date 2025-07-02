@@ -16,7 +16,7 @@ jest.mock('../../models/Order', () => ({
 
 jest.mock('../../events/eventBus', () => ({
   eventBus: {
-    publish: jest.fn(),
+    publish: jest.fn().mockResolvedValue(),
     subscribe: jest.fn(),
     unsubscribe: jest.fn()
   }
@@ -26,6 +26,14 @@ jest.mock('../../config/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
   debug: jest.fn()
+}));
+
+jest.mock('../../events/eventTypes', () => ({
+  ORDER_EVENTS: {
+    ORDER_CREATED: 'order.created',
+    ORDER_UPDATED: 'order.updated',
+    ORDER_CANCELLED: 'order.cancelled'
+  }
 }));
 
 // Setup Express app for testing
@@ -55,9 +63,12 @@ app.patch('/orders/:id/status', orderController.updateOrderStatus);
 
 // Add simple error handling middleware for tests
 app.use((err, req, res, next) => {
+  console.error('Test error handler caught:', err.message);
+  console.error('Error stack:', err.stack);
   res.status(err.statusCode || 500).json({
     status: err.status || 'error',
-    message: err.message
+    message: err.message,
+    stack: process.env.NODE_ENV === 'test' ? err.stack : undefined
   });
 });
 
@@ -237,7 +248,9 @@ describe('Order Controller', () => {
           totalPrice: item.quantity * item.unitPrice
         })),
         totalAmount: 35.00,
-        status: 'pending'
+        status: 'pending',
+        shippingAddress: orderDataWithMultipleItems.shippingAddress,
+        payment: orderDataWithMultipleItems.payment
       };
 
       Order.create.mockResolvedValue(mockOrder);
@@ -253,8 +266,7 @@ describe('Order Controller', () => {
         .send(orderDataWithMultipleItems);
 
       if (response.status !== 201) {
-        console.log('Error response:', response.body);
-        console.log('Status:', response.status);
+        throw new Error(`Expected status 201 but got ${response.status}. Response: ${JSON.stringify(response.body, null, 2)}`);
       }
 
       expect(response.status).toBe(201);

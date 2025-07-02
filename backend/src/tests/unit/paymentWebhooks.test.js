@@ -1,7 +1,6 @@
 const request = require('supertest');
 const express = require('express');
 const Order = require('../../models/Order');
-const eventBus = require('../../events/eventBus');
 const logger = require('../../config/logger');
 
 // Mock dependencies
@@ -48,9 +47,11 @@ jest.mock('../../models/Order', () => ({
 }));
 
 jest.mock('../../events/eventBus', () => ({
-  publish: jest.fn(),
-  subscribe: jest.fn(),
-  unsubscribe: jest.fn()
+  eventBus: {
+    publish: jest.fn(),
+    subscribe: jest.fn(),
+    unsubscribe: jest.fn()
+  }
 }));
 
 jest.mock('../../config/logger', () => ({
@@ -62,6 +63,7 @@ jest.mock('../../config/logger', () => ({
 
 const Stripe = require('stripe');
 const stripe = new Stripe('test_key');
+const { eventBus } = require('../../events/eventBus');
 
 // Import payment controller after mocks are set up
 const paymentController = require('../../controllers/paymentController');

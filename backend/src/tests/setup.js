@@ -1,6 +1,5 @@
 // Mock environment variables
 process.env.NODE_ENV = 'test';
-process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/realtime-order-management-system-test';
 process.env.REDIS_HOST = 'localhost';
 process.env.REDIS_PORT = '6379';
 process.env.JWT_SECRET = 'test_jwt_secret_1234567890_abcdef';
@@ -10,9 +9,12 @@ process.env.STRIPE_SECRET_KEY = 'sk_test_fake_key_for_testing';
 process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_fake_webhook_secret';
 process.env.FRONTEND_URL = 'http://localhost:3000';
 
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+
+let mongoServer;
 
 // Mock Redis connection
 jest.mock('../config/redis', () => ({
@@ -45,13 +47,25 @@ jest.mock('../config/logger', () => ({
 
 // Global test setup
 beforeAll(async () => {
-  // Setup test database connection if needed
-  await mongoose.connect(process.env.MONGODB_URI);
+  // Start in-memory MongoDB instance
+  mongoServer = await MongoMemoryServer.create();
+  const mongoUri = mongoServer.getUri();
+
+  // Set the MongoDB URI for tests
+  process.env.MONGODB_URI = mongoUri;
+
+  // Connect to the in-memory database
+  await mongoose.connect(mongoUri);
 });
 
 afterAll(async () => {
-  // Cleanup test database if needed
-  await mongoose.connection.close();
+  // Cleanup test database and stop MongoDB instance
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.connection.close();
+  }
+  if (mongoServer) {
+    await mongoServer.stop();
+  }
 });
 
 beforeEach(async () => {

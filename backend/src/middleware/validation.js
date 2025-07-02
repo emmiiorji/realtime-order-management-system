@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const AppError = require('../utils/appError')
+const AppError = require('../utils/appError');
 
 // User validation schemas
 const userSchema = Joi.object({

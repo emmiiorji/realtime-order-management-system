@@ -2,7 +2,7 @@ const Stripe = require('stripe');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Order = require('../models/Order');
-const eventBus = require('../events/eventBus');
+const { eventBus } = require('../events/eventBus');
 const { ORDER_EVENTS } = require('../events/eventTypes');
 const logger = require('../config/logger');
 
