@@ -39,7 +39,6 @@ services:
         fromService:
           type: web
           name: realtime-order-management-frontend
-          property: url
       - key: RATE_LIMIT_WINDOW_MS
         value: 900000
       - key: RATE_LIMIT_MAX_REQUESTS
@@ -55,18 +54,14 @@ services:
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
     envVars:
-      - key: VITE_API_BASE_URL
+      - key: VITE_BACKEND_URL
         fromService:
           type: web
           name: realtime-order-management-backend
-          property: url
-          envVarKey: VITE_API_BASE_URL
       - key: VITE_WS_URL
         fromService:
           type: web
           name: realtime-order-management-backend
-          property: url
-          envVarKey: VITE_WS_URL
       - key: VITE_APP_NAME
         value: Real-time Order Management System
       - key: VITE_APP_VERSION
@@ -79,6 +74,9 @@ services:
     name: realtime-order-management-redis
     plan: starter
     maxmemoryPolicy: allkeys-lru
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow access from all Render services
 
 # Note: MongoDB is external, Redis is managed by Render
 # Configure MongoDB connection in the Render dashboard

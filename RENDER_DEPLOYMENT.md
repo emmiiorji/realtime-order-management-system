@@ -83,13 +83,14 @@ EMAIL_SERVICE_API_KEY=your_email_api_key
 EMAIL_FROM=noreply@yourdomain.com
 ```
 
-### Step 5: Update Frontend Environment
-The frontend environment variables should be automatically configured, but verify:
+### Step 5: Frontend Environment (Automatic)
+The frontend environment variables are automatically configured by the Blueprint:
 
-```
-VITE_API_BASE_URL=https://your-backend-service.onrender.com/api
-VITE_WS_URL=https://your-backend-service.onrender.com
-```
+- `VITE_BACKEND_URL` - Automatically set to your backend service URL
+- `VITE_WS_URL` - Automatically set to your backend service URL
+- The frontend code automatically appends `/api` to `VITE_BACKEND_URL` for API calls
+
+No manual configuration needed!
 
 ## 🔧 Post-Deployment Configuration
 
