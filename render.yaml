@@ -63,6 +63,8 @@ services:
     plan: starter
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
+    dockerBuildArgs:
+      NGINX_CONFIG: render
     envVars:
       - key: VITE_BACKEND_URL
         fromService:

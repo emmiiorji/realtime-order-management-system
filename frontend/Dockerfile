@@ -23,8 +23,17 @@ FROM nginx:alpine
 # Copy built app from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy nginx configurations
+COPY nginx.conf /etc/nginx/nginx.local.conf
+COPY nginx.render.conf /etc/nginx/nginx.render.conf
+
+# Use appropriate config based on environment (default to local for Docker Compose)
+ARG NGINX_CONFIG=local
+RUN if [ "$NGINX_CONFIG" = "render" ]; then \
+        cp /etc/nginx/nginx.render.conf /etc/nginx/nginx.conf; \
+    else \
+        cp /etc/nginx/nginx.local.conf /etc/nginx/nginx.conf; \
+    fi
 
 # Create non-root user
 RUN addgroup -g 1001 -S nginx || true
