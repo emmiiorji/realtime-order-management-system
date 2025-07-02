@@ -1,33 +1,34 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios from "axios";
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
 
 // Create axios instance
-const apiClient: AxiosInstance = axios.create({
+const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor
 apiClient.interceptors.request.use(
-  (config) => {
+  (config: any) => {
     // Add auth token if available
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
     // Add correlation ID for tracing
-    config.headers['x-correlation-id'] = generateCorrelationId();
+    config.headers["x-correlation-id"] = generateCorrelationId();
 
     // Add user ID if available
-    const userId = localStorage.getItem('userId');
+    const userId = localStorage.getItem("userId");
     if (userId) {
-      config.headers['x-user-id'] = userId;
+      config.headers["x-user-id"] = userId;
     }
 
     return config;
@@ -39,15 +40,15 @@ apiClient.interceptors.request.use(
 
 // Response interceptor
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
+  (response: any) => {
     return response;
   },
-  (error) => {
+  (error: any) => {
     if (error.response?.status === 401) {
       // Handle unauthorized access
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userId');
-      window.location.href = '/login';
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userId");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -60,19 +61,21 @@ function generateCorrelationId(): string {
 
 // Generic API methods
 export const api = {
-  get: <T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
+  get: <T = any>(url: string, config?: any): Promise<{ data: T }> =>
     apiClient.get(url, config),
-  
-  post: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    apiClient.post(url, data, config),
-  
-  put: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
+  post: <T = any>(
+    url: string,
+    data?: any,
+    config?: any
+  ): Promise<{ data: T }> => apiClient.post(url, data, config),
+  put: <T = any>(url: string, data?: any, config?: any): Promise<{ data: T }> =>
     apiClient.put(url, data, config),
-  
-  patch: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    apiClient.patch(url, data, config),
-  
-  delete: <T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
+  patch: <T = any>(
+    url: string,
+    data?: any,
+    config?: any
+  ): Promise<{ data: T }> => apiClient.patch(url, data, config),
+  delete: <T = any>(url: string, config?: any): Promise<{ data: T }> =>
     apiClient.delete(url, config),
 };
 
@@ -102,7 +105,7 @@ export interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  role: 'user' | 'admin' | 'moderator';
+  role: "user" | "admin" | "moderator";
   isActive: boolean;
   isEmailVerified: boolean;
   lastLogin?: string;
@@ -124,7 +127,7 @@ export interface User {
         sms: boolean;
         push: boolean;
       };
-      theme: 'light' | 'dark' | 'auto';
+      theme: "light" | "dark" | "auto";
       language: string;
     };
   };
@@ -150,7 +153,7 @@ export interface UpdateUserRequest {
   email?: string;
   firstName?: string;
   lastName?: string;
-  profile?: Partial<User['profile']>;
+  profile?: Partial<User["profile"]>;
 }
 
 // Order types
@@ -190,13 +193,20 @@ export interface Order {
   id: string;
   orderNumber: string;
   userId: string;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+  status:
+    | "pending"
+    | "confirmed"
+    | "processing"
+    | "shipped"
+    | "delivered"
+    | "cancelled"
+    | "refunded";
   items: OrderItem[];
   subtotal: number;
   tax: number;
   shipping: {
     cost: number;
-    method: 'standard' | 'express' | 'overnight' | 'pickup';
+    method: "standard" | "express" | "overnight" | "pickup";
     estimatedDelivery?: string;
     trackingNumber?: string;
     carrier?: string;
@@ -204,15 +214,26 @@ export interface Order {
   discount: {
     amount: number;
     code?: string;
-    type?: 'percentage' | 'fixed' | 'free_shipping';
+    type?: "percentage" | "fixed" | "free_shipping";
   };
   totalAmount: number;
   currency: string;
   shippingAddress: ShippingAddress;
   billingAddress?: ShippingAddress;
   payment: {
-    method: 'credit_card' | 'debit_card' | 'paypal' | 'stripe' | 'cash_on_delivery';
-    status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'cancelled';
+    method:
+      | "credit_card"
+      | "debit_card"
+      | "paypal"
+      | "stripe"
+      | "cash_on_delivery";
+    status:
+      | "pending"
+      | "processing"
+      | "completed"
+      | "failed"
+      | "refunded"
+      | "cancelled";
     transactionId?: string;
     amount: number;
     currency: string;
@@ -233,23 +254,26 @@ export interface Order {
 }
 
 export interface CreateOrderRequest {
-  items: Omit<OrderItem, 'totalPrice'>[];
+  items: Omit<OrderItem, "totalPrice">[];
   shippingAddress: ShippingAddress;
   billingAddress?: ShippingAddress;
   payment: {
-    method: Order['payment']['method'];
+    method: Order["payment"]["method"];
     amount: number;
     currency?: string;
   };
   shipping?: {
-    method?: Order['shipping']['method'];
+    method?: Order["shipping"]["method"];
     cost?: number;
   };
   discount?: {
     code?: string;
     amount?: number;
-    type?: Order['discount']['type'];
+    type?: Order["discount"]["type"];
   };
+  subtotal?: number;
+  totalAmount?: number;
+  tax?: number;
   notes?: string;
   customerNotes?: string;
 }

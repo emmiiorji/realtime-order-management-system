@@ -1,7 +1,6 @@
 /* OrderForm Styles */
 .order-form {
-  max-height: 70vh;
-  overflow-y: auto;
+  /* Remove max-height and overflow since modal handles scrolling */
 }
 
 .order-form__section {
@@ -159,11 +158,10 @@
 
 .order-form__error {
   background-color: #fef2f2;
-  color: #dc2626;
-  padding: 0.75rem;
-  border-radius: 0.375rem;
   border: 1px solid #fecaca;
-  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .order-form__section select,
@@ -215,7 +213,7 @@
   .order-form__item-fields {
     grid-template-columns: 1fr;
   }
-  
+
   .order-form__address-fields {
     grid-template-columns: 1fr;
   }

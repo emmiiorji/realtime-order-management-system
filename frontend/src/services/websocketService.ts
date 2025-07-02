@@ -1,5 +1,5 @@
-import { io, Socket } from 'socket.io-client';
-import type { Event } from './api';
+import { io, Socket } from "socket.io-client";
+import type { Event } from "./api";
 
 export type EventCallback = (event: Event) => void;
 export type ConnectionCallback = () => void;
@@ -21,12 +21,9 @@ class WebSocketService {
   }
 
   private connect(): void {
-    const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
-    
+    const wsUrl = import.meta.env.VITE_WS_URL || "http://localhost:3001";
+
     this.socket = io(wsUrl, {
-      transports: ['websocket'],
-      upgrade: true,
-      rememberUpgrade: true,
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: this.maxReconnectAttempts,
@@ -40,71 +37,87 @@ class WebSocketService {
   private setupEventListeners(): void {
     if (!this.socket) return;
 
-    this.socket.on('connect', () => {
-      console.log('WebSocket connected');
+    this.socket.on("connect", () => {
+      console.log("WebSocket connected");
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      
+
       // Join user-specific room if authenticated
-      const userId = localStorage.getItem('userId');
+      const userId = localStorage.getItem("userId");
       if (userId) {
-        this.socket?.emit('join-room', `user-${userId}`);
+        this.socket?.emit("join-room", `user-${userId}`);
       }
 
-      this.connectionCallbacks.forEach(callback => callback());
+      this.connectionCallbacks.forEach((callback) => callback());
     });
 
-    this.socket.on('disconnect', (reason) => {
-      console.log('WebSocket disconnected:', reason);
+    this.socket.on("disconnect", (reason) => {
+      console.log("WebSocket disconnected:", reason);
       this.isConnected = false;
-      this.disconnectionCallbacks.forEach(callback => callback());
+      this.disconnectionCallbacks.forEach((callback) => callback());
     });
 
-    this.socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
+    this.socket.on("connect_error", (error) => {
+      console.error("WebSocket connection error:", error);
       this.reconnectAttempts++;
-      this.errorCallbacks.forEach(callback => callback(error));
+      this.errorCallbacks.forEach((callback) => callback(error));
     });
 
-    this.socket.on('reconnect', (attemptNumber) => {
+    this.socket.on("reconnect", (attemptNumber) => {
       console.log(`WebSocket reconnected after ${attemptNumber} attempts`);
       this.isConnected = true;
       this.reconnectAttempts = 0;
     });
 
-    this.socket.on('reconnect_error', (error) => {
-      console.error('WebSocket reconnection error:', error);
-      this.errorCallbacks.forEach(callback => callback(error));
+    this.socket.on("reconnect_error", (error) => {
+      console.error("WebSocket reconnection error:", error);
+      this.errorCallbacks.forEach((callback) => callback(error));
     });
 
-    this.socket.on('reconnect_failed', () => {
-      console.error('WebSocket reconnection failed');
-      this.errorCallbacks.forEach(callback => 
-        callback(new Error('Failed to reconnect to WebSocket'))
+    this.socket.on("reconnect_failed", () => {
+      console.error("WebSocket reconnection failed");
+      this.errorCallbacks.forEach((callback) =>
+        callback(new Error("Failed to reconnect to WebSocket"))
       );
     });
 
     // Listen for real-time events
-    this.socket.on('event', (eventData: { type: string; data: Event }) => {
-      console.log('Received real-time event:', eventData);
+    this.socket.on("event", (eventData: { type: string; data: Event }) => {
+      console.log("Received real-time event:", eventData);
       this.handleEvent(eventData.type, eventData.data);
     });
 
     // Listen for specific event types
-    this.socket.on('user.created', (event: Event) => this.handleEvent('user.created', event));
-    this.socket.on('user.updated', (event: Event) => this.handleEvent('user.updated', event));
-    this.socket.on('user.deleted', (event: Event) => this.handleEvent('user.deleted', event));
-    this.socket.on('order.created', (event: Event) => this.handleEvent('order.created', event));
-    this.socket.on('order.updated', (event: Event) => this.handleEvent('order.updated', event));
-    this.socket.on('order.cancelled', (event: Event) => this.handleEvent('order.cancelled', event));
-    this.socket.on('order.completed', (event: Event) => this.handleEvent('order.completed', event));
-    this.socket.on('order.shipped', (event: Event) => this.handleEvent('order.shipped', event));
+    this.socket.on("user.created", (event: Event) =>
+      this.handleEvent("user.created", event)
+    );
+    this.socket.on("user.updated", (event: Event) =>
+      this.handleEvent("user.updated", event)
+    );
+    this.socket.on("user.deleted", (event: Event) =>
+      this.handleEvent("user.deleted", event)
+    );
+    this.socket.on("order.created", (event: Event) =>
+      this.handleEvent("order.created", event)
+    );
+    this.socket.on("order.updated", (event: Event) =>
+      this.handleEvent("order.updated", event)
+    );
+    this.socket.on("order.cancelled", (event: Event) =>
+      this.handleEvent("order.cancelled", event)
+    );
+    this.socket.on("order.completed", (event: Event) =>
+      this.handleEvent("order.completed", event)
+    );
+    this.socket.on("order.shipped", (event: Event) =>
+      this.handleEvent("order.shipped", event)
+    );
   }
 
   private handleEvent(eventType: string, event: Event): void {
     // Call specific event type callbacks
     const typeCallbacks = this.eventCallbacks.get(eventType) || [];
-    typeCallbacks.forEach(callback => {
+    typeCallbacks.forEach((callback) => {
       try {
         callback(event);
       } catch (error) {
@@ -113,12 +126,12 @@ class WebSocketService {
     });
 
     // Call general event callbacks
-    const generalCallbacks = this.eventCallbacks.get('*') || [];
-    generalCallbacks.forEach(callback => {
+    const generalCallbacks = this.eventCallbacks.get("*") || [];
+    generalCallbacks.forEach((callback) => {
       try {
         callback(event);
       } catch (error) {
-        console.error('Error in general event callback:', error);
+        console.error("Error in general event callback:", error);
       }
     });
   }
@@ -128,7 +141,7 @@ class WebSocketService {
     if (!this.eventCallbacks.has(eventType)) {
       this.eventCallbacks.set(eventType, []);
     }
-    
+
     this.eventCallbacks.get(eventType)!.push(callback);
 
     // Return unsubscribe function
@@ -144,12 +157,12 @@ class WebSocketService {
   }
 
   public subscribeToAll(callback: EventCallback): () => void {
-    return this.subscribe('*', callback);
+    return this.subscribe("*", callback);
   }
 
   public onConnect(callback: ConnectionCallback): () => void {
     this.connectionCallbacks.push(callback);
-    
+
     // If already connected, call immediately
     if (this.isConnected) {
       callback();
@@ -187,13 +200,13 @@ class WebSocketService {
 
   public joinRoom(room: string): void {
     if (this.socket && this.isConnected) {
-      this.socket.emit('join-room', room);
+      this.socket.emit("join-room", room);
     }
   }
 
   public leaveRoom(room: string): void {
     if (this.socket && this.isConnected) {
-      this.socket.emit('leave-room', room);
+      this.socket.emit("leave-room", room);
     }
   }
 

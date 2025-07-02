@@ -1,16 +1,16 @@
-const Order = require('../models/Order');
-const AppError = require('../utils/appError');
-const catchAsync = require('../utils/catchAsync');
-const { eventBus } = require('../events/eventBus');
-const { ORDER_EVENTS } = require('../events/eventTypes');
-const logger = require('../config/logger');
+const Order = require("../models/Order");
+const AppError = require("../utils/appError");
+const catchAsync = require("../utils/catchAsync");
+const { eventBus } = require("../events/eventBus");
+const { ORDER_EVENTS } = require("../events/eventTypes");
+const logger = require("../config/logger");
 
 // Create a new order
 exports.createOrder = catchAsync(async (req, res, next) => {
-  const userId = req.headers['x-user-id']; // Temporary solution
-  
+  const userId = req.headers["x-user-id"]; // Temporary solution
+
   if (!userId) {
-    return next(new AppError('User not authenticated', 401));
+    return next(new AppError("User not authenticated", 401));
   }
 
   // Add userId to the order data
@@ -19,48 +19,57 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     userId,
     metadata: {
       ...req.body.metadata,
-      source: req.body.metadata?.source || 'web',
+      source: req.body.metadata?.source || "web",
       ipAddress: req.ip,
-      userAgent: req.get('User-Agent'),
-      createdBy: userId
-    }
+      userAgent: req.get("User-Agent"),
+      createdBy: userId,
+    },
   };
 
   // Calculate item totals
-  orderData.items = orderData.items.map(item => ({
+  orderData.items = orderData.items.map((item) => ({
     ...item,
-    totalPrice: item.quantity * item.unitPrice
+    totalPrice: item.quantity * item.unitPrice,
   }));
+
+  // Ensure required fields have default values
+  if (!orderData.tax) orderData.tax = 0;
+  if (!orderData.shipping) orderData.shipping = { cost: 0, method: "standard" };
+  if (!orderData.discount) orderData.discount = { amount: 0 };
 
   const order = await Order.create(orderData);
 
   // Publish order created event
-  await eventBus.publish(ORDER_EVENTS.ORDER_CREATED, {
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-    userId: order.userId,
-    items: order.items,
-    totalAmount: order.totalAmount,
-    status: order.status,
-    shippingAddress: order.shippingAddress,
-    paymentMethod: order.payment.method
-  }, {
-    correlationId: req.headers['x-correlation-id'],
-    userId: userId
-  });
+  await eventBus.publish(
+    ORDER_EVENTS.ORDER_CREATED,
+    {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      userId: order.userId,
+      items: order.items,
+      totalAmount: order.totalAmount,
+      status: order.status,
+      shippingAddress: order.shippingAddress,
+      paymentMethod: order.payment.method,
+    },
+    {
+      correlationId: req.headers["x-correlation-id"],
+      userId: userId,
+    }
+  );
 
-  logger.info(`New order created: ${order.orderNumber}`, { 
-    orderId: order.id, 
+  logger.info(`New order created: ${order.orderNumber}`, {
+    orderId: order.id,
     userId: order.userId,
-    totalAmount: order.totalAmount 
+    totalAmount: order.totalAmount,
   });
 
   res.status(201).json({
-    status: 'success',
-    message: 'Order created successfully',
+    status: "success",
+    message: "Order created successfully",
     data: {
-      order
-    }
+      order,
+    },
   });
 });
 
@@ -75,7 +84,8 @@ exports.getAllOrders = catchAsync(async (req, res, next) => {
   if (req.query.userId) filter.userId = req.query.userId;
   if (req.query.startDate || req.query.endDate) {
     filter.createdAt = {};
-    if (req.query.startDate) filter.createdAt.$gte = new Date(req.query.startDate);
+    if (req.query.startDate)
+      filter.createdAt.$gte = new Date(req.query.startDate);
     if (req.query.endDate) filter.createdAt.$lte = new Date(req.query.endDate);
   }
 
@@ -87,26 +97,26 @@ exports.getAllOrders = catchAsync(async (req, res, next) => {
   const total = await Order.countDocuments(filter);
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     results: orders.length,
     pagination: {
       page,
       limit,
       total,
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit),
     },
     data: {
-      orders
-    }
+      orders,
+    },
   });
 });
 
 // Get user's orders
 exports.getMyOrders = catchAsync(async (req, res, next) => {
-  const userId = req.headers['x-user-id']; // Temporary solution
-  
+  const userId = req.headers["x-user-id"]; // Temporary solution
+
   if (!userId) {
-    return next(new AppError('User not authenticated', 401));
+    return next(new AppError("User not authenticated", 401));
   }
 
   const page = parseInt(req.query.page) || 1;
@@ -124,60 +134,63 @@ exports.getMyOrders = catchAsync(async (req, res, next) => {
   const total = await Order.countDocuments(filter);
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     results: orders.length,
     pagination: {
       page,
       limit,
       total,
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit),
     },
     data: {
-      orders
-    }
+      orders,
+    },
   });
 });
 
 // Get single order
 exports.getOrder = catchAsync(async (req, res, next) => {
-  const userId = req.headers['x-user-id']; // Temporary solution
+  const userId = req.headers["x-user-id"]; // Temporary solution
   const orderId = req.params.id;
 
   const filter = { id: orderId };
-  
+
   // Non-admin users can only see their own orders
-  if (!req.headers['x-user-role'] || req.headers['x-user-role'] !== 'admin') {
+  if (!req.headers["x-user-role"] || req.headers["x-user-role"] !== "admin") {
     filter.userId = userId;
   }
 
   const order = await Order.findOne(filter);
 
   if (!order) {
-    return next(new AppError('Order not found', 404));
+    return next(new AppError("Order not found", 404));
   }
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
-      order
-    }
+      order,
+    },
   });
 });
 
 // Update order
 exports.updateOrder = catchAsync(async (req, res, next) => {
-  const userId = req.headers['x-user-id']; // Temporary solution
+  const userId = req.headers["x-user-id"]; // Temporary solution
   const orderId = req.params.id;
 
   const filter = { id: orderId };
-  
+
   // Non-admin users can only update their own orders
-  if (!req.headers['x-user-role'] || req.headers['x-user-role'] !== 'admin') {
+  if (!req.headers["x-user-role"] || req.headers["x-user-role"] !== "admin") {
     filter.userId = userId;
   }
 
   // Don't allow status updates through this route for non-admin users
-  if (req.body.status && (!req.headers['x-user-role'] || req.headers['x-user-role'] !== 'admin')) {
+  if (
+    req.body.status &&
+    (!req.headers["x-user-role"] || req.headers["x-user-role"] !== "admin")
+  ) {
     delete req.body.status;
   }
 
@@ -185,42 +198,46 @@ exports.updateOrder = catchAsync(async (req, res, next) => {
     filter,
     {
       ...req.body,
-      'metadata.updatedBy': userId
+      "metadata.updatedBy": userId,
     },
     {
       new: true,
-      runValidators: true
+      runValidators: true,
     }
   );
 
   if (!updatedOrder) {
-    return next(new AppError('Order not found', 404));
+    return next(new AppError("Order not found", 404));
   }
 
   // Publish order updated event
-  await eventBus.publish(ORDER_EVENTS.ORDER_UPDATED, {
-    orderId: updatedOrder.id,
-    orderNumber: updatedOrder.orderNumber,
-    userId: updatedOrder.userId,
-    updatedFields: Object.keys(req.body),
-    updatedBy: userId,
-    ...req.body
-  }, {
-    correlationId: req.headers['x-correlation-id'],
-    userId: userId
-  });
+  await eventBus.publish(
+    ORDER_EVENTS.ORDER_UPDATED,
+    {
+      orderId: updatedOrder.id,
+      orderNumber: updatedOrder.orderNumber,
+      userId: updatedOrder.userId,
+      updatedFields: Object.keys(req.body),
+      updatedBy: userId,
+      ...req.body,
+    },
+    {
+      correlationId: req.headers["x-correlation-id"],
+      userId: userId,
+    }
+  );
 
-  logger.info(`Order updated: ${updatedOrder.orderNumber}`, { 
+  logger.info(`Order updated: ${updatedOrder.orderNumber}`, {
     orderId: updatedOrder.id,
-    updatedBy: userId 
+    updatedBy: userId,
   });
 
   res.status(200).json({
-    status: 'success',
-    message: 'Order updated successfully',
+    status: "success",
+    message: "Order updated successfully",
     data: {
-      order: updatedOrder
-    }
+      order: updatedOrder,
+    },
   });
 });
 
@@ -228,16 +245,16 @@ exports.updateOrder = catchAsync(async (req, res, next) => {
 exports.updateOrderStatus = catchAsync(async (req, res, next) => {
   const { status, reason, notes } = req.body;
   const orderId = req.params.id;
-  const updatedBy = req.headers['x-user-id'] || 'admin';
+  const updatedBy = req.headers["x-user-id"] || "admin";
 
   if (!status) {
-    return next(new AppError('Status is required', 400));
+    return next(new AppError("Status is required", 400));
   }
 
   const order = await Order.findOne({ id: orderId });
 
   if (!order) {
-    return next(new AppError('Order not found', 404));
+    return next(new AppError("Order not found", 404));
   }
 
   const oldStatus = order.status;
@@ -245,122 +262,137 @@ exports.updateOrderStatus = catchAsync(async (req, res, next) => {
 
   // Publish appropriate event based on status
   let eventType = ORDER_EVENTS.ORDER_UPDATED;
-  
+
   switch (status) {
-    case 'cancelled':
+    case "cancelled":
       eventType = ORDER_EVENTS.ORDER_CANCELLED;
       break;
-    case 'completed':
-    case 'delivered':
+    case "completed":
+    case "delivered":
       eventType = ORDER_EVENTS.ORDER_COMPLETED;
       break;
-    case 'shipped':
+    case "shipped":
       eventType = ORDER_EVENTS.ORDER_SHIPPED;
       break;
   }
 
-  await eventBus.publish(eventType, {
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-    userId: order.userId,
-    oldStatus,
-    newStatus: status,
-    updatedBy,
-    reason,
-    notes
-  }, {
-    correlationId: req.headers['x-correlation-id'],
-    userId: updatedBy
-  });
+  await eventBus.publish(
+    eventType,
+    {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      userId: order.userId,
+      oldStatus,
+      newStatus: status,
+      updatedBy,
+      reason,
+      notes,
+    },
+    {
+      correlationId: req.headers["x-correlation-id"],
+      userId: updatedBy,
+    }
+  );
 
-  logger.info(`Order status updated: ${order.orderNumber} from ${oldStatus} to ${status}`, { 
-    orderId: order.id,
-    updatedBy 
-  });
+  logger.info(
+    `Order status updated: ${order.orderNumber} from ${oldStatus} to ${status}`,
+    {
+      orderId: order.id,
+      updatedBy,
+    }
+  );
 
   res.status(200).json({
-    status: 'success',
-    message: 'Order status updated successfully',
+    status: "success",
+    message: "Order status updated successfully",
     data: {
-      order
-    }
+      order,
+    },
   });
 });
 
 // Cancel order
 exports.cancelOrder = catchAsync(async (req, res, next) => {
-  const userId = req.headers['x-user-id']; // Temporary solution
+  const userId = req.headers["x-user-id"]; // Temporary solution
   const orderId = req.params.id;
   const { reason } = req.body;
 
   const filter = { id: orderId };
-  
+
   // Non-admin users can only cancel their own orders
-  if (!req.headers['x-user-role'] || req.headers['x-user-role'] !== 'admin') {
+  if (!req.headers["x-user-role"] || req.headers["x-user-role"] !== "admin") {
     filter.userId = userId;
   }
 
   const order = await Order.findOne(filter);
 
   if (!order) {
-    return next(new AppError('Order not found', 404));
+    return next(new AppError("Order not found", 404));
   }
 
   // Check if order can be cancelled
-  if (['shipped', 'delivered', 'cancelled'].includes(order.status)) {
-    return next(new AppError('Order cannot be cancelled in its current status', 400));
+  if (["shipped", "delivered", "cancelled"].includes(order.status)) {
+    return next(
+      new AppError("Order cannot be cancelled in its current status", 400)
+    );
   }
 
-  await order.updateStatus('cancelled', userId, reason || 'Cancelled by user');
+  await order.updateStatus("cancelled", userId, reason || "Cancelled by user");
 
   // Publish order cancelled event
-  await eventBus.publish(ORDER_EVENTS.ORDER_CANCELLED, {
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-    userId: order.userId,
-    reason: reason || 'Cancelled by user',
-    cancelledBy: userId,
-    refundAmount: order.totalAmount
-  }, {
-    correlationId: req.headers['x-correlation-id'],
-    userId: userId
-  });
+  await eventBus.publish(
+    ORDER_EVENTS.ORDER_CANCELLED,
+    {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      userId: order.userId,
+      reason: reason || "Cancelled by user",
+      cancelledBy: userId,
+      refundAmount: order.totalAmount,
+    },
+    {
+      correlationId: req.headers["x-correlation-id"],
+      userId: userId,
+    }
+  );
 
-  logger.info(`Order cancelled: ${order.orderNumber}`, { 
+  logger.info(`Order cancelled: ${order.orderNumber}`, {
     orderId: order.id,
     cancelledBy: userId,
-    reason 
+    reason,
   });
 
   res.status(200).json({
-    status: 'success',
-    message: 'Order cancelled successfully',
+    status: "success",
+    message: "Order cancelled successfully",
     data: {
-      order
-    }
+      order,
+    },
   });
 });
 
 // Get order tracking information
 exports.getOrderTracking = catchAsync(async (req, res, next) => {
-  const userId = req.headers['x-user-id']; // Temporary solution
+  const userId = req.headers["x-user-id"]; // Temporary solution
   const orderId = req.params.id;
 
   const filter = { id: orderId };
-  
+
   // Non-admin users can only track their own orders
-  if (!req.headers['x-user-role'] || req.headers['x-user-role'] !== 'admin') {
+  if (!req.headers["x-user-role"] || req.headers["x-user-role"] !== "admin") {
     filter.userId = userId;
   }
 
-  const order = await Order.findOne(filter).select('id orderNumber status statusHistory shipping createdAt');
+  const order = await Order.findOne(filter).select(
+    "id orderNumber status statusHistory shipping createdAt"
+  );
 
   if (!order) {
-    return next(new AppError('Order not found', 404));
+    return next(new AppError("Order not found", 404));
   }
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       tracking: {
         orderId: order.id,
@@ -370,25 +402,25 @@ exports.getOrderTracking = catchAsync(async (req, res, next) => {
         carrier: order.shipping.carrier,
         estimatedDelivery: order.shipping.estimatedDelivery,
         statusHistory: order.statusHistory,
-        createdAt: order.createdAt
-      }
-    }
+        createdAt: order.createdAt,
+      },
+    },
   });
 });
 
 // Get order statistics
 exports.getOrderStats = catchAsync(async (req, res, next) => {
   const dateRange = {};
-  
+
   if (req.query.startDate) dateRange.start = req.query.startDate;
   if (req.query.endDate) dateRange.end = req.query.endDate;
 
   const stats = await Order.getStats(dateRange);
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
-      stats
-    }
+      stats,
+    },
   });
 });
