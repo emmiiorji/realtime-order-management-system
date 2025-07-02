@@ -83,10 +83,17 @@ This project showcases a complete real-time order management system featuring:
 
 ## 📋 Prerequisites
 
+### For Local Development
 - **Node.js** 18+ and npm
 - **Docker** and Docker Compose
 - **MongoDB** (if running locally)
 - **Redis** (if running locally)
+
+### For Cloud Deployment (e.g Render)
+- **GitHub/GitLab** account with your code repository
+- **External MongoDB** database (MongoDB Atlas, DigitalOcean, etc.)
+- **Stripe** account for payment processing
+- **Render** account for deployment
 
 ## 🚀 Quick Start
 
@@ -398,7 +405,47 @@ All sensitive data is managed through environment variables:
 
 ## 🚀 Deployment
 
-### Production Deployment with Docker
+### Cloud Deployment (e.g Render)
+
+Deploy to Render using the included Blueprint configuration for a fully managed cloud deployment.
+
+1. **Prerequisites**
+   - Push your code to GitHub/GitLab
+   - Set up external MongoDB database (MongoDB Atlas, DigitalOcean, etc.)
+   - The Blueprint will create a managed Redis service automatically
+
+2. **Deploy with Blueprint**
+   ```bash
+   # Your render.yaml file is already configured
+   # Just deploy via Render dashboard:
+   # 1. Go to Render Dashboard
+   # 2. Click "New" → "Blueprint"
+   # 3. Connect your repository
+   # 4. Render auto-detects render.yaml
+   # 5. Click "Apply"
+   ```
+
+3. **Environment Configuration**
+   Set these environment variables in Render dashboard:
+   ```env
+   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/order_management_db
+   JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+   ENCRYPTION_KEY=your-32-char-encryption-key
+   API_KEY_SECRET=your-api-key-secret
+   SESSION_SECRET=your-session-secret-min-32-chars
+   STRIPE_SECRET_KEY=sk_live_your_stripe_secret_key
+   STRIPE_PUBLISHABLE_KEY=pk_live_your_stripe_publishable_key
+   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+   ```
+
+4. **Services Created**
+   - **Backend**: Node.js API service (private)
+   - **Frontend**: React static site (public)
+   - **Redis**: Managed Redis cache service
+
+📖 **Detailed Guide**: See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for complete setup instructions.
+
+### Local Development with Docker
 
 1. **Build and deploy**
    ```bash

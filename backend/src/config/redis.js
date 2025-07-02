@@ -10,13 +10,27 @@ class RedisConnection {
 
   async connect() {
     try {
-      const redisConfig = {
-        url: `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`,
-        password: process.env.REDIS_PASSWORD || undefined,
-        retryDelayOnFailover: 100,
-        enableReadyCheck: false,
-        maxRetriesPerRequest: null,
-      };
+      // Support both REDIS_URL (from Render managed Redis) and individual config
+      let redisConfig;
+
+      if (process.env.REDIS_URL) {
+        // Use REDIS_URL if provided (Render managed Redis)
+        redisConfig = {
+          url: process.env.REDIS_URL,
+          retryDelayOnFailover: 100,
+          enableReadyCheck: false,
+          maxRetriesPerRequest: null,
+        };
+      } else {
+        // Use individual Redis configuration
+        redisConfig = {
+          url: `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`,
+          password: process.env.REDIS_PASSWORD || undefined,
+          retryDelayOnFailover: 100,
+          enableReadyCheck: false,
+          maxRetriesPerRequest: null,
+        };
+      }
 
       // Main client for general operations
       this.client = redis.createClient(redisConfig);
